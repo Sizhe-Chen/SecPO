@@ -92,7 +92,7 @@ def test_genetic_success_requires_exact_agentdojo_checker() -> None:
         initial_injections=("high-heuristic", "exact"),
         config=GeneticConfig(
             steps=2,
-            candidates_per_step=1,
+            candidates_per_step=2,
             num_islands=2,
             query_budget=2,
             early_stop_score=10.0,

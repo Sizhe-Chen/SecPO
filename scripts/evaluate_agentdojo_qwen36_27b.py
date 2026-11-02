@@ -12,10 +12,10 @@ Examples::
     python scripts/evaluate_agentdojo_qwen36_27b.py static \
       --checkout /path/to/agentdojo --output results/agentdojo-static.json
 
-The ``adaptive`` command derives all 80 goals from the pinned checkout and
-executes every candidate in a fresh AgentDojo environment.  Only the attacker
-proposer and optional dense failure scorer are callback-driven; exact success
-always comes from AgentDojo's own task checker.
+The ``adaptive`` command derives all 80 goals from the pinned checkout,
+executes complete candidate generations, then independently replays the
+selected payload. The built-in model backend is configured through environment
+variables; callback overrides remain available for integrations and tests.
 """
 
 from __future__ import annotations
@@ -27,7 +27,8 @@ from pathlib import Path
 import sys
 from typing import Any
 
-from secpo.attacks import GeneticConfig
+from secpo.attacks.agentdojo_genetic import AgentDojoGeneticConfig
+from secpo.evaluation.agentdojo_models import AgentDojoModelBackend
 from secpo.evaluation.agentdojo_qwen36 import (
     AgentDojoEpisode,
     AgentDojoTask,
@@ -121,7 +122,7 @@ def _parser() -> argparse.ArgumentParser:
         help="run the exact resumable v1.2.1 paper-80 Genetic evaluation",
     )
     _add_checkout(adaptive)
-    adaptive.add_argument("--proposer", required=True)
+    adaptive.add_argument("--proposer", help="Optional package.module:callable override for the built-in attacker")
     adaptive.add_argument(
         "--dense-scorer",
         help="Optional package.module:callable(task, injection, transcript)",
@@ -135,11 +136,18 @@ def _parser() -> argparse.ArgumentParser:
         help="Repeat to run a subset; omit to execute all 80 pairs.",
     )
     adaptive.add_argument("--resume", action="store_true")
+    adaptive.add_argument("--search-only", action="store_true",
+                          help="Use exact-first search ASR with candidate checkpoints and no final replay")
+    adaptive.add_argument("--backend-config", type=Path,
+                          help="JSON with non-secret attacker/judge settings, optionally under models")
+    adaptive.add_argument("--format-retry-rounds", type=int, default=15)
     adaptive.add_argument("--steps", type=int, default=100)
     adaptive.add_argument("--candidates", type=int, default=8)
     adaptive.add_argument("--query-budget", type=int, default=800)
     adaptive.add_argument("--seed", type=int, default=1234)
     adaptive.add_argument("--transcript-max-chars", type=int, default=16000)
+    adaptive.add_argument("--tool-result-max-chars", type=int, default=3000)
+    adaptive.add_argument("--runtime-identity", default="", help="Version tag for custom callback models, prompts and runtime settings")
     return parser
 
 
@@ -180,23 +188,46 @@ def main(argv: list[str] | None = None) -> int:
             args.checkout,
             optional_patch=args.optional_patch,
         )
-        proposer = _load_callable(args.proposer, "proposer")
-        dense_scorer = (
-            None
-            if args.dense_scorer is None
-            else _load_callable(args.dense_scorer, "dense scorer")
-        )
+        if args.backend_config and args.proposer:
+            raise ValueError("backend-config cannot be combined with a custom proposer")
+        if args.backend_config:
+            from secpo.evaluation.agentdojo_search import backend_from_config
+            raw = json.loads(args.backend_config.read_text(encoding="utf-8"))
+            backend = backend_from_config(raw.get("models", raw))
+        else:
+            backend = AgentDojoModelBackend.from_environment() if args.proposer is None else None
+        proposer = backend.propose if backend is not None else _load_callable(args.proposer, "proposer")
+        dense_scorer = (_load_callable(args.dense_scorer, "dense scorer") if args.dense_scorer
+                        else backend.score if backend is not None else None)
         episode = FreshAgentDojoEpisodeRunner(
             config=config,
             dense_scorer=dense_scorer,
             transcript_max_chars=args.transcript_max_chars,
+            tool_result_max_chars=args.tool_result_max_chars,
         )
+        if args.search_only:
+            from secpo.evaluation.agentdojo_search import run_paper80_search
+            if args.query_budget != args.steps * args.candidates:
+                raise ValueError("search-only requires query-budget equal to steps times candidates")
+            if args.seed != 1234:
+                raise ValueError("search-only uses the existing identity-derived seed with base 1234")
+            summary = run_paper80_search(
+                tasks=tasks, proposer=proposer, episode=episode,
+                output_dir=args.output_dir, steps=args.steps, candidates=args.candidates,
+                format_retry_rounds=args.format_retry_rounds, resume=args.resume,
+                task_indices=args.task_index or None, upstream=upstream,
+                run_identity={"callback_runtime_version": args.runtime_identity},
+            )
+            print(json.dumps({"output": str(args.output_dir / "summary.json"),
+                              "completed_pairs": summary["completed_pairs"],
+                              "search_asr_so_far": summary["search_asr_so_far"]}))
+            return 0
         summary = run_paper80_genetic(
             tasks=tasks,
             proposer=proposer,
             episode=episode,
             output_dir=args.output_dir,
-            config=GeneticConfig(
+            config=AgentDojoGeneticConfig(
                 steps=args.steps,
                 candidates_per_step=args.candidates,
                 num_islands=5,
@@ -209,6 +240,7 @@ def main(argv: list[str] | None = None) -> int:
             resume=args.resume,
             task_indices=args.task_index or None,
             upstream=upstream,
+            run_identity={"callback_runtime_version": args.runtime_identity},
         )
         print(
             json.dumps(
@@ -238,7 +270,7 @@ def main(argv: list[str] | None = None) -> int:
         task=tasks[args.task_index],
         proposer=proposer,
         episode=episode,
-        config=GeneticConfig(
+        config=AgentDojoGeneticConfig(
             steps=args.steps,
             candidates_per_step=args.candidates,
             num_islands=5,

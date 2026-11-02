@@ -83,6 +83,9 @@ def test_paper80_orchestrator_writes_all_pairs_and_skips_them_on_resume(tmp_path
         calls.append(task.key)
         return AgentDojoEpisode("trace", False, True, 0.0)
 
+    def unused_proposer(request):
+        raise AssertionError("one seed exhausts this test budget")
+
     config = GeneticConfig(
         steps=1,
         candidates_per_step=1,
@@ -93,9 +96,7 @@ def test_paper80_orchestrator_writes_all_pairs_and_skips_them_on_resume(tmp_path
     )
     summary = run_paper80_genetic(
         tasks=tasks,
-        proposer=lambda request: (_ for _ in ()).throw(
-            AssertionError("one seed exhausts this test budget")
-        ),
+        proposer=unused_proposer,
         episode=episode,
         output_dir=tmp_path,
         config=config,
@@ -103,14 +104,15 @@ def test_paper80_orchestrator_writes_all_pairs_and_skips_them_on_resume(tmp_path
     assert summary["complete_paper80"] is True
     assert summary["selected_count"] == 80
     assert summary["victim_queries"] == 80
-    assert len(calls) == 80
+    assert summary["final_replay_queries"] == 80
+    assert len(calls) == 160  # One search episode and one final replay per pair.
     assert len(list((tmp_path / "pairs").glob("*.json"))) == 80
     assert len(list((tmp_path / "checkpoints").glob("*.json"))) == 80
 
     calls.clear()
     resumed = run_paper80_genetic(
         tasks=tasks,
-        proposer=_proposal,
+        proposer=unused_proposer,
         episode=episode,
         output_dir=tmp_path,
         config=config,

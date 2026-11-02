@@ -251,7 +251,17 @@
         "third_party/README.md",
         "third_party/patches/agentdojo.patch",
         "third_party/patches/agentdyn.patch",
-        "third_party/patches/dtap.patch"
+        "third_party/patches/dtap.patch",
+        "src/secpo/attacks/agentdojo_genetic.py",
+        "src/secpo/evaluation/agentdojo_models.py",
+        "src/secpo/evaluation/agentdojo_prompts.py",
+        "src/secpo/evaluation/agentdojo_transport.py",
+        "tests/test_agentdojo_research_search.py",
+        "tests/test_agentdojo_transport.py",
+        "configs/evaluate_agentdojo_search_qwen36_secpo.json",
+        "src/secpo/attacks/agentdojo_exact_first.py",
+        "src/secpo/evaluation/agentdojo_search.py",
+        "tests/test_agentdojo_exact_first.py"
       ],
       "required_paths": [
         "README.md",
