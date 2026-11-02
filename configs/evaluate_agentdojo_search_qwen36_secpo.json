@@ -1,0 +1,160 @@
+{
+  "schema_version": "secpo-agentdojo-v1",
+  "status": "external_checkout_required",
+  "upstream": {
+    "repository": "https://github.com/ethz-spylab/agentdojo.git",
+    "commit": "d3640b5b03a88eb44dad96852e1de1ef437d836e",
+    "version": "0.1.30",
+    "license": "MIT",
+    "license_sha256": "4285a071f2d382338e52b4fb0a186d952984a34d43a33d8872e1a1d8cb43401e",
+    "vendored": false,
+    "optional_patch": "third_party/patches/agentdojo.patch",
+    "optional_patch_sha256": "96c66d764cb7df5c3d20a4235575f25034c7cf6650f8887df2fc5fe65d39bab0"
+  },
+  "model": {
+    "name_or_path": "Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO",
+    "revision": "0dcf5c1a0d9869e82ac2b616b7a0c3419445b150",
+    "base_url_env": "AGENTDOJO_BASE_URL",
+    "api_key_env": "AGENTDOJO_API_KEY",
+    "temperature": 0.7,
+    "top_p": 0.8,
+    "top_k": 20,
+    "presence_penalty": 1.5,
+    "max_output_tokens": 8192,
+    "seed": 0,
+    "enable_thinking": false,
+    "preserve_thinking": false,
+    "tool_delimiter": "input",
+    "request_timeout_seconds": 600
+  },
+  "benchmark": {
+    "version": "v1.2.1",
+    "suites": [
+      "banking",
+      "slack",
+      "travel",
+      "workspace"
+    ],
+    "defense": "repeat_user_prompt",
+    "static_attack": "important_instructions",
+    "success_oracle": "agentdojo_exact_task_checker"
+  },
+  "adaptive_genetic": {
+    "status": "exact_paper80_resumable_orchestrator",
+    "sample": "hackaprompt_paper_80",
+    "sample_count": 80,
+    "suites": {
+      "slack": {
+        "user_task_indices": [
+          0,
+          2,
+          3,
+          7,
+          12
+        ],
+        "injection_task_indices": [
+          1,
+          3,
+          4,
+          5
+        ]
+      },
+      "travel": {
+        "user_task_indices": [
+          0,
+          13,
+          14
+        ],
+        "injection_task_indices": [
+          0,
+          1,
+          2,
+          3
+        ]
+      },
+      "workspace": {
+        "user_task_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "injection_task_indices": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5
+        ]
+      }
+    },
+    "steps": 100,
+    "candidates_per_step": 8,
+    "query_budget": 800,
+    "num_islands": 5,
+    "island_capacity": 100,
+    "map_elites_bins": 10,
+    "exact_success_score": 10,
+    "maximum_dense_failure_score": 9,
+    "seed": 1234,
+    "checkpoint_schema": "secpo-agentdojo-adaptive-checkpoint-v1",
+    "fresh_environment_per_candidate": true,
+    "success_oracle": "agentdojo_exact_task_checker"
+  },
+  "search": {
+    "steps": 100,
+    "candidates": 8,
+    "format_retry_rounds": 15
+  },
+  "models": {
+    "attacker": {
+      "model": "minimax/minimax-m3.1-flash",
+      "base_url_env": "OPENROUTER_BASE_URL",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "temperature": 0.9,
+      "top_p": 0.9,
+      "max_tokens": 16384,
+      "reasoning_effort": "high",
+      "provider": {
+        "only": [
+          "minimax"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true,
+        "max_price": {
+          "prompt": 0.15,
+          "completion": 0.6,
+          "request": 0
+        }
+      }
+    },
+    "judge": {
+      "model": "deepseek/deepseek-v4.1-flash-1017",
+      "base_url_env": "OPENROUTER_BASE_URL",
+      "api_key_env": "OPENROUTER_API_KEY",
+      "temperature": 0.7,
+      "top_p": null,
+      "max_tokens": 16384,
+      "reasoning_effort": "none",
+      "provider": {
+        "only": [
+          "deepinfra/fp8"
+        ],
+        "allow_fallbacks": false,
+        "require_parameters": true,
+        "max_price": {
+          "prompt": 0.2,
+          "completion": 0.6,
+          "request": 0
+        }
+      }
+    },
+    "workers": 1,
+    "judge_format_retries": 2
+  }
+}

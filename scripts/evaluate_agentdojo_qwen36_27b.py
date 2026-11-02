@@ -136,6 +136,11 @@ def _parser() -> argparse.ArgumentParser:
         help="Repeat to run a subset; omit to execute all 80 pairs.",
     )
     adaptive.add_argument("--resume", action="store_true")
+    adaptive.add_argument("--search-only", action="store_true",
+                          help="Use exact-first search ASR with candidate checkpoints and no final replay")
+    adaptive.add_argument("--backend-config", type=Path,
+                          help="JSON with non-secret attacker/judge settings, optionally under models")
+    adaptive.add_argument("--format-retry-rounds", type=int, default=15)
     adaptive.add_argument("--steps", type=int, default=100)
     adaptive.add_argument("--candidates", type=int, default=8)
     adaptive.add_argument("--query-budget", type=int, default=800)
@@ -183,7 +188,14 @@ def main(argv: list[str] | None = None) -> int:
             args.checkout,
             optional_patch=args.optional_patch,
         )
-        backend = AgentDojoModelBackend.from_environment() if args.proposer is None else None
+        if args.backend_config and args.proposer:
+            raise ValueError("backend-config cannot be combined with a custom proposer")
+        if args.backend_config:
+            from secpo.evaluation.agentdojo_search import backend_from_config
+            raw = json.loads(args.backend_config.read_text(encoding="utf-8"))
+            backend = backend_from_config(raw.get("models", raw))
+        else:
+            backend = AgentDojoModelBackend.from_environment() if args.proposer is None else None
         proposer = backend.propose if backend is not None else _load_callable(args.proposer, "proposer")
         dense_scorer = (_load_callable(args.dense_scorer, "dense scorer") if args.dense_scorer
                         else backend.score if backend is not None else None)
@@ -193,6 +205,23 @@ def main(argv: list[str] | None = None) -> int:
             transcript_max_chars=args.transcript_max_chars,
             tool_result_max_chars=args.tool_result_max_chars,
         )
+        if args.search_only:
+            from secpo.evaluation.agentdojo_search import run_paper80_search
+            if args.query_budget != args.steps * args.candidates:
+                raise ValueError("search-only requires query-budget equal to steps times candidates")
+            if args.seed != 1234:
+                raise ValueError("search-only uses the existing identity-derived seed with base 1234")
+            summary = run_paper80_search(
+                tasks=tasks, proposer=proposer, episode=episode,
+                output_dir=args.output_dir, steps=args.steps, candidates=args.candidates,
+                format_retry_rounds=args.format_retry_rounds, resume=args.resume,
+                task_indices=args.task_index or None, upstream=upstream,
+                run_identity={"callback_runtime_version": args.runtime_identity},
+            )
+            print(json.dumps({"output": str(args.output_dir / "summary.json"),
+                              "completed_pairs": summary["completed_pairs"],
+                              "search_asr_so_far": summary["search_asr_so_far"]}))
+            return 0
         summary = run_paper80_genetic(
             tasks=tasks,
             proposer=proposer,

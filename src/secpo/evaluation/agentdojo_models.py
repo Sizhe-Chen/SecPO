@@ -97,6 +97,7 @@ class OpenAIChatConfig:
     reasoning_effort: str | None = None
     timeout: float = 600.0
     http_attempts: int = 3
+    provider: Mapping[str, Any] | None = None
 
     def __post_init__(self) -> None:
         if not self.model.strip():
@@ -109,6 +110,10 @@ class OpenAIChatConfig:
             raise ValueError("top_p must be between 0 and 1")
         if self.max_tokens <= 0 or self.http_attempts <= 0 or not math.isfinite(self.timeout) or self.timeout <= 0:
             raise ValueError("token limit, timeout and HTTP attempts must be positive")
+        if self.provider is not None:
+            if not isinstance(self.provider, Mapping):
+                raise ValueError("provider must be a JSON object")
+            json.dumps(dict(self.provider), allow_nan=False)
 
     def endpoint(self) -> str:
         value = os.environ.get(self.base_url_env, "").strip().rstrip("/")
@@ -151,6 +156,8 @@ class OpenAIChatModel:
             payload["top_p"] = self.config.top_p
         if self.config.reasoning_effort:
             payload["reasoning_effort"] = self.config.reasoning_effort
+        if self.config.provider is not None:
+            payload["provider"] = dict(self.config.provider)
         headers = {"Authorization": "Bearer " + key, "Content-Type": "application/json"}
         for attempt in range(self.config.http_attempts):
             try:
