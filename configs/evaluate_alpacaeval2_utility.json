@@ -12,12 +12,10 @@
     "redistribution": "external"
   },
   "metric": {
-    "primary": "length_controlled_winrate",
-    "fn_metric": null,
-    "sort_by": null,
-    "metric_kwargs": {
-      "save_weights_dir": null
-    }
+    "primary": "win_rate",
+    "fn_metric": "get_winrate",
+    "sort_by": "win_rate",
+    "metric_kwargs": null
   },
   "alpaca_eval": {
     "annotators_config_env": "SECPO_UTILITY_ANNOTATORS_CONFIG",

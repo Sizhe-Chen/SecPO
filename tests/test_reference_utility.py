@@ -46,8 +46,10 @@ def test_committed_configs_freeze_exact_references_and_metrics() -> None:
     assert alpaca.reference.sha256 == (
         "653c131d58e8d5802203c85e80ca3fb4b378f22e2a0280ad5cd910ff0bee9535"
     )
-    assert alpaca.metric.primary == "length_controlled_winrate"
-    assert alpaca.metric.fn_metric is None
+    assert alpaca.metric.primary == "win_rate"
+    assert alpaca.metric.fn_metric == "get_winrate"
+    assert alpaca.metric.sort_by == "win_rate"
+    assert alpaca.metric.metric_kwargs is None
 
     assert sep.expected_rows == 9160
     assert sep.reference.generator == "meta-llama/Meta-Llama-3-8B-Instruct"
@@ -60,9 +62,10 @@ def test_committed_configs_freeze_exact_references_and_metrics() -> None:
     assert sep.metric.metric_kwargs is None
 
 
-def test_parser_rejects_length_control_on_sep() -> None:
+@pytest.mark.parametrize("suite", ["sep", "alpacaeval2"])
+def test_parser_rejects_length_control_in_raw_win_rate_protocol(suite: str) -> None:
     value = json.loads(
-        (ROOT / "configs/evaluate_sep_utility.json").read_text(encoding="utf-8")
+        (ROOT / f"configs/evaluate_{suite}_utility.json").read_text(encoding="utf-8")
     )
     value["metric"] = {
         "primary": "length_controlled_winrate",
@@ -147,7 +150,7 @@ def test_preflight_rejects_reference_drift(tmp_path: Path) -> None:
         )
 
 
-def test_commands_preserve_suite_specific_aggregation(tmp_path: Path) -> None:
+def test_commands_use_raw_win_rate_for_both_suites(tmp_path: Path) -> None:
     alpaca = load_reference_utility_config(
         ROOT / "configs/evaluate_alpacaeval2_utility.json"
     )
@@ -174,9 +177,9 @@ def test_commands_preserve_suite_specific_aggregation(tmp_path: Path) -> None:
         output_dir=tmp_path / "alpaca",
         annotators_config="runtime-config",
     )
-    assert "--metric_kwargs" in alpaca_command
-    assert "--fn_metric" not in alpaca_command
-    assert "--sort_by" not in alpaca_command
+    assert "--metric_kwargs" not in alpaca_command
+    assert alpaca_command[alpaca_command.index("--fn_metric") + 1] == "get_winrate"
+    assert alpaca_command[alpaca_command.index("--sort_by") + 1] == "win_rate"
     assert "{'is_ordered': True}" in alpaca_command
 
     sep_command = build_alpaca_eval_command(

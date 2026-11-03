@@ -25,6 +25,13 @@ this directory; consult `DATASET_CARD.md` before publishing this repository.
 
 ## Trainer contract
 
+For another base model, first [generate that model's own response labels](../docs/TRAINING.md#generate-model-specific-response-labels)
+with [`generate_response_labels.py`](../scripts/generate_response_labels.py).
+The raw `chosen_input` already contains the clean task and input;
+`rejected_input` is answered separately as the attacker target request.
+`prepare_preferences.py` validates existing responses; it does not generate
+them or rerender prompts for another model family.
+
 The trainer reads JSON arrays, JSON Lines, and their `.json.gz` or
 `.jsonl.gz` equivalents. Each prepared record must provide the four strings
 below:

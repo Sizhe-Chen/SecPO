@@ -114,3 +114,46 @@ dense score as success.
 
 The legacy `genetic` subcommand remains as a one-pair callback harness. It is
 useful for integration tests but is not the recommended paper-80 entry point.
+
+## Low-cost AttackerMovesSecond (Section 4.6)
+
+The released [AttackerMovesSecond search](../src/secpo/attacks/agentdojo_exact_first.py)
+uses **MiniMax-M3.1-Flash with high reasoning** as the attacker and
+**DeepSeek-V4.1-Flash-1017 with reasoning disabled** as the critic. The
+80-case ASR@800 evaluation costs **less than $200** in the reported setup,
+including the worst case in which every case exhausts its budget without a
+successful attack. Actual charges depend on provider pricing and usage;
+the runner does not enforce a dollar cap.
+
+The main AgentDojo results in [Performance](PERFORMANCE.md) use the original **Gemini-2.5-Pro** attack
+configuration. The cheaper profile is a separate configuration, so its cost
+should not be combined with the main result as if both came from one run.
+
+Implementation entry points:
+
+- [Exact-first search and candidate checkpoints](../src/secpo/attacks/agentdojo_exact_first.py)
+- [Portable 80-pair orchestration and resume](../src/secpo/evaluation/agentdojo_search.py)
+- [Attacker, critic, and victim configuration](../configs/evaluate_agentdojo_search_qwen36_secpo.json)
+- [Evaluation CLI](../scripts/evaluate_agentdojo_qwen36_27b.py)
+
+After installing the pinned AgentDojo checkout, serving the victim model, and
+setting `AGENTDOJO_BASE_URL`, optional `AGENTDOJO_API_KEY`,
+`OPENROUTER_BASE_URL`, and `OPENROUTER_API_KEY`, run:
+
+```bash
+python scripts/evaluate_agentdojo_qwen36_27b.py \
+  --config configs/evaluate_agentdojo_search_qwen36_secpo.json \
+  adaptive \
+  --checkout /path/to/agentdojo \
+  --backend-config configs/evaluate_agentdojo_search_qwen36_secpo.json \
+  --search-only \
+  --output-dir results/agentdojo_search \
+  --resume
+```
+
+The default budget is 100 generations of eight candidates per task pair.
+AgentDojo's exact checker determines success, and search stops at the first
+successful candidate. Failed generations receive critic scores after their
+exact checks. Completed candidates and scores are checkpointed for resume.
+`--search-only` reports search success without an independent final replay;
+ordinary `adaptive` evaluation retains the final replay.

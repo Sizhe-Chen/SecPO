@@ -261,7 +261,15 @@
         "configs/evaluate_agentdojo_search_qwen36_secpo.json",
         "src/secpo/attacks/agentdojo_exact_first.py",
         "src/secpo/evaluation/agentdojo_search.py",
-        "tests/test_agentdojo_exact_first.py"
+        "tests/test_agentdojo_exact_first.py",
+        "setup.py",
+        "demo.py",
+        "scripts/generate_response_labels.py",
+        "tests/test_setup_entrypoint.py",
+        "tests/test_demo.py",
+        "tests/test_generate_response_labels.py",
+        "docs/PERFORMANCE.md",
+        "docs/TRAINING.md"
       ],
       "required_paths": [
         "README.md",
@@ -346,7 +354,15 @@
         "tests/test_dtap_qwen_agent_backend.py",
         "data/dtap_qwen36_non_vm_tasks.jsonl",
         "data/DATASET_CARD.md",
-        "data/qwen36_offline_dataset/manifest.json"
+        "data/qwen36_offline_dataset/manifest.json",
+        "setup.py",
+        "demo.py",
+        "scripts/generate_response_labels.py",
+        "tests/test_setup_entrypoint.py",
+        "tests/test_demo.py",
+        "tests/test_generate_response_labels.py",
+        "docs/PERFORMANCE.md",
+        "docs/TRAINING.md"
       ]
     },
     "maintainer_source_backup": {
@@ -573,6 +589,21 @@
       "id": "one_time_operations_and_generated_state",
       "classification": "exclude",
       "scope": "Repair/migration scripts, failed-batch recovery, watchdogs, private provider clients, caches, logs, results, checkpoints, weights, containers, and local environments are never copied into this artifact."
+    },
+    {
+      "id": "getting_started",
+      "classification": "include",
+      "scope": "Idempotent data setup, saved adaptive attack demo, per-model response-label generation, and concise training and performance guides. Model inference remains an explicit runtime action.",
+      "release_paths": [
+        "setup.py",
+        "demo.py",
+        "scripts/generate_response_labels.py",
+        "tests/test_setup_entrypoint.py",
+        "tests/test_demo.py",
+        "tests/test_generate_response_labels.py",
+        "docs/PERFORMANCE.md",
+        "docs/TRAINING.md"
+      ]
     }
   ]
 }

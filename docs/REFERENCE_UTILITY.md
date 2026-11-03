@@ -6,12 +6,12 @@ the candidate side of both comparisons.
 
 | Suite | Rows | Comparator outputs | Primary metric |
 | --- | ---: | --- | --- |
-| AlpacaEval2 | 805 | `gpt-4o-2024-05-13` | length-controlled win rate |
+| AlpacaEval2 | 805 | `gpt-4o-2024-05-13` | raw win rate |
 | SEP Utility | 9,160 | `meta-llama/Meta-Llama-3-8B-Instruct` | ordinary win rate |
 
-SEP deliberately uses AlpacaEval's dataset-independent `get_winrate`
-aggregation. The AlpacaEval2 length-control fit is tied to the 805
-AlpacaEval2 instructions and must not be applied to SEP's 9,160 rows.
+Both suites use AlpacaEval's dataset-independent `get_winrate` aggregation
+and report `win_rate`. Length-controlled win rate is a different metric and
+must not replace these raw win-rate results.
 
 ## External reference files
 

@@ -114,8 +114,8 @@ are the exact 805-row `gpt-4o-2024-05-13` AlpacaEval2 output and exact 9,160-row
 `meta-llama/Meta-Llama-3-8B-Instruct` SEP output, locked by SHA-256, generator,
 row identity, and ordering. Those comparator files, a pinned lm-eval install,
 and the original Llama custom task YAMLs remain external. The AlpacaEval2
-primary metric is length-controlled win rate; SEP Utility uses the raw
-`get_winrate` result. See `REFERENCE_UTILITY.md` for hashes and commands.
+and SEP Utility primary metric is raw win rate, using `get_winrate`.
+See `REFERENCE_UTILITY.md` for hashes and commands.
 
 ## Model-specific matrix
 
@@ -139,3 +139,138 @@ installed, but their accepted revisions and patch states are pinned and
 verified. Any later change to the paper-main matrix must update this document,
 the component inventory, the profile allowlist, tests, and the reproducibility
 record in the same reviewed commit.
+
+## Running SEP and utility evaluations
+
+Run these commands from the repository root.
+
+### Static and Basic Adaptive SEP
+
+Prepare portable requests without loading a model:
+
+```bash
+python scripts/evaluate_sep_static.py prepare \
+  --input /path/to/SEP_dataset_test.json \
+  --output /tmp/static_requests.jsonl \
+  --model-family llama31_8b
+```
+
+Run a local callable victim and optional semantic judge:
+
+```bash
+python scripts/evaluate_sep_static.py run \
+  --input /path/to/SEP_dataset_test.json \
+  --output /tmp/static_predictions.jsonl \
+  --model-family qwen36_27b \
+  --generator your_package.victim:generate \
+  --judge your_package.judge:judge
+```
+
+The default registry contains exactly six static attacks plus the two
+model-specific completion attacks. There is no dynamic `eval()` dispatch.
+Witness misses are always failures; witness hits remain pending unless a judge
+callable decides them.
+
+To apply the paper's strict three-judges-by-three-trials protocol to generated
+JSONL, supply a provider-neutral routing callable:
+
+```bash
+python scripts/judge_sep_outputs.py \
+  --input /tmp/static_predictions.jsonl \
+  --output /tmp/static_judged.jsonl \
+  --config configs/evaluate_sep_judges.json \
+  --backend your_package.judges:judge
+```
+
+The backend receives the three manuscript routing labels from
+`configs/evaluate_sep_judges.json`. All nine valid votes must be `YES`.
+Exhausted backend failures produce an explicit unknown result, never a
+synthetic negative vote; successful votes resume from a fingerprinted cache.
+
+### Genetic, PAIR, and TAP adaptive SEP
+
+A deterministic dry run verifies installation and checkpoint behavior:
+
+```bash
+python scripts/evaluate_sep_adaptive.py \
+  --algorithm genetic \
+  --output /tmp/adaptive_dry_run.json
+```
+
+For a scientific run, supply an importable backend implementing `propose`,
+`victim`, and dense `score`, plus a provider-neutral binary judge callable:
+
+```bash
+python scripts/evaluate_sep_adaptive.py \
+  --config configs/evaluate_sep_adaptive_qwen36_27b.json \
+  --input /path/to/SEP_dataset_test.json \
+  --output /tmp/adaptive_results.json \
+  --backend your_package.backend:Backend \
+  --judge-backend your_package.judges:judge \
+  --algorithm tap \
+  --checkpoint-dir /tmp/adaptive_state
+```
+
+Use `configs/evaluate_sep_adaptive_llama31_8b.json` for Llama. Genetic retains
+the working island/MAP-Elites implementation. Qwen PAIR and TAP share the
+current Llama-derived orchestration while applying Qwen-specific stop tokens,
+trusted-`user`/untrusted-`input` rendering, and reasoning removal before every
+score or witness check. TAP defaults to depth 10, width 10, branch factor 8;
+Genetic and TAP cap all victim calls, including seed evaluation, at 800.
+
+Dense fitness guides search but cannot declare success. Every witness-positive
+candidate receives the released three-model-by-three-trial panel, and only
+unanimous `9/9 YES` can early-stop or count toward ASR. Malformed/exhausted
+votes remain unknown. Candidate votes and search state are checkpointed with a
+configuration/example/model-policy fingerprint and reject incompatible resume.
+
+### Utility evaluation
+
+For MMLU-Pro, GPQA Diamond, GSM8K, and MATH, print the exact commands before
+executing them:
+
+```bash
+python scripts/evaluate_lm_eval_utility.py \
+  --config configs/evaluate_lm_eval_qwen36_27b.json \
+  --adapter-path /path/to/secpo_adapter \
+  --output-dir /tmp/qwen36_utility
+```
+
+Add `--execute` after reviewing the printed commands. The child receives no
+credential variables by default. For a gated model, pass only an already-set
+variable name explicitly; the option is repeatable:
+
+```bash
+python scripts/evaluate_lm_eval_utility.py \
+  --config configs/evaluate_lm_eval_qwen36_27b.json \
+  --adapter-path /path/to/secpo_adapter \
+  --output-dir /tmp/qwen36_utility \
+  --execute \
+  --pass-env HF_TOKEN
+```
+
+AlpacaEval2 and SEP Utility use the dedicated reference workflow:
+
+```bash
+export SECPO_UTILITY_ANNOTATORS_CONFIG=<reviewed-alpaca-eval-config>
+python scripts/evaluate_reference_utility.py \
+  --config configs/evaluate_alpacaeval2_utility.json \
+  --candidate /path/to/alpacaeval2_candidate_outputs.json \
+  --reference /path/to/alpaca_eval2_gpt-4o-2024-05-13_official_reference_outputs.json \
+  --output-dir /tmp/alpacaeval2_utility
+
+python scripts/evaluate_reference_utility.py \
+  --config configs/evaluate_sep_utility.json \
+  --candidate /path/to/sep_candidate_outputs.json \
+  --reference "/path/to/SEP_dataset_test_Meta-Llama-3-8B-Instruct copy.json" \
+  --output-dir /tmp/sep_utility
+```
+
+The default mode performs full preflight and prints the external
+`alpaca_eval` command; add `--execute` to run it. The exact 805-row GPT-4o and
+9,160-row Llama-3-8B comparator files remain external, but their SHA-256,
+generator identity, ordering, and metrics are frozen and validated. See
+`docs/REFERENCE_UTILITY.md`. Reference evaluation likewise passes no
+credential by default; when needed, append a reviewed name such as
+`--pass-env EVALUATOR_API_TOKEN` after setting that variable outside the
+repository.

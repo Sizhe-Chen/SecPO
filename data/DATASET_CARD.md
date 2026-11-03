@@ -61,7 +61,7 @@ Every raw record has exactly these fields:
 - `rejected`: response associated with following the injected task.
 - `rejected_input_whole`: exact injected text removed to form the benign
   reference prompt.
-- `chosen_input`: trusted instruction.
+- `chosen_input`: complete trusted instruction plus clean input.
 - `rejected_input`: injection seed retained from an earlier construction
   stage; it is not consumed by the released trainer.
 - `chosen_data`: trusted untrusted-data field retained for provenance checks.

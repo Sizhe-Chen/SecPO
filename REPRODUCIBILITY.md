@@ -122,51 +122,17 @@ checkpoint, and a separately operated model service.
 See `docs/AGENTDOJO.md`,
 `docs/AGENTDYN.md`, and `docs/DTAP.md` for the exact external boundaries.
 
-## SecPO-only main results reported in the submission
+## Main results
 
-All values are percentages.
+See [Performance](docs/PERFORMANCE.md) for the complete utility and security
+comparisons, model settings, metrics, and evaluation sizes.
 
-### Llama-3.1-8B-Instruct, online SecPO
-
-| Metric | SecPO |
-| --- | ---: |
-| MMLU-Pro | 46.3 |
-| GPQA Diamond | 24.2 |
-| GSM8K | 81.3 |
-| MATH | 50.1 |
-| AlpacaEval2 Utility | 30.8 |
-| SEP Utility | 50.1 |
-| SEP ASR | 1.4 |
-| SEP Basic Adaptive ASR | 10.6 |
-| SEP Genetic Adaptive ASR | 12.3 |
-| SEP TAP Adaptive ASR | 12.2 |
-
-### Qwen3.6-27B, offline non-thinking SecPO
-
-| Metric | SecPO |
-| --- | ---: |
-| MMLU-Pro | 84.8 |
-| GPQA Diamond | 81.8 |
-| GSM8K | 95.8 |
-| MATH | 95.9 |
-| AlpacaEval2 Utility | 73.7 |
-| SEP Utility | 84.6 |
-| AgentDojo Utility | 88.7 |
-| AgentDojo ASR | 0.0 |
-| AgentDojo Genetic Adaptive ASR | 7.5 |
-| SEP ASR | 1.4 |
-| SEP Genetic Adaptive ASR | 5.8 |
-| SEP TAP Adaptive ASR | 6.7 |
-
-The release includes clean static SEP, Basic Adaptive, Genetic/MAP-Elites,
-PAIR, Llama-derived shared TAP, witness-first unanimous-nine judging, exact
-reference-utility preflight, Qwen merge, paper-80 AgentDojo, AgentDyn, and DTap
-interfaces. Scientific runs still require externally installed victim,
-attacker, judge, agent-benchmark, model, dataset, and evaluator dependencies.
-The AlpacaEval2 and SEP comparator outputs remain external but are frozen by
-generator, row count, alignment, and SHA-256. Therefore the table records the
-submission results but is not a claim that external services can reproduce
-historical hosted-model behavior byte-for-byte.
+The release includes static SEP, Basic Adaptive, Genetic/MAP-Elites, PAIR,
+TAP, witness-first unanimous-nine judging, reference-utility evaluation,
+Qwen merge, AgentDojo, AgentDyn, and DTaP interfaces. Scientific runs require
+the external models, benchmark environments, and evaluator dependencies
+described below. AlpacaEval2 and SEP report raw win rates. Fixed comparator
+outputs are validated by generator, row count, alignment, and SHA-256.
 
 ## Reproduction boundary
 

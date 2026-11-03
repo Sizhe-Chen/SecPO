@@ -6,13 +6,12 @@ builds an ``alpaca_eval`` command.  It contains no provider client, endpoint,
 credential, or private path.  The evaluator configuration is supplied at
 runtime by CLI option or environment variable.
 
-Two protocol details are deliberately different:
+Both protocols report raw pairwise win rate with ``get_winrate``:
 
-* AlpacaEval2 reports length-controlled win rate on 805 examples against the
+* AlpacaEval2 evaluates 805 examples against the
   research snapshot's fixed GPT-4o-2024-05-13 comparator outputs.
-* SEP Utility reports ordinary pairwise win rate on 9,160 examples against
-  Meta-Llama-3-8B-Instruct comparator outputs.  AlpacaEval2's 805-example
-  length-control fit is not valid for SEP.
+* SEP Utility evaluates 9,160 examples against
+  Meta-Llama-3-8B-Instruct comparator outputs.
 """
 
 from __future__ import annotations
@@ -247,10 +246,10 @@ def parse_reference_utility_config(value: Any) -> ReferenceUtilityConfig:
                 generator="gpt-4o-2024-05-13",
                 redistribution="external",
             ),
-            "primary": "length_controlled_winrate",
-            "fn_metric": None,
-            "sort_by": None,
-            "metric_kwargs": {"save_weights_dir": None},
+            "primary": "win_rate",
+            "fn_metric": "get_winrate",
+            "sort_by": "win_rate",
+            "metric_kwargs": None,
         },
         "sep": {
             "rows": 9160,
