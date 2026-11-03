@@ -1,10 +1,10 @@
 # SecPO: Principled Adversarial Training for Prompt Injection Security
 
-Recognized as a top threat to AI agents, prompt injection allows instructions from untrusted data (email, documents, websites) to manipulate the agent’s operation. The existing best-defended LLM, Meta-SecAlign, is trained with the DPO loss but still suffers from attack success rates (ASRs) approaching 100% under adaptive prompt injections. One reason is that DPO anchors the model around the undefended reference model, which is insecure. We show an idealized reference model—an injection-invariant, utility-preserving oracle—can nevertheless be approximated, as its output distribution in training is interestingly accessible. This new observation motivates a theoretically principled SecPO loss. Another Meta-SecAlign shortcoming is that it trains on weak simulated attacks. We implement an efficient adversarial training (AT) pipeline that synthesizes strong injected inputs (best@240), and train the model on them. Our AT reduces ASRs by 1.5–14.5× across three SoTA adaptive attacks, compared with Meta-SecAlign; the SecPO loss reduces them by a further 2.4–4.6× compared with using DPO loss. In agentic workflows, our SecPO + AT Qwen3.6-27B is much more secure than Meta-SecAlign: 8.8% vs. 78.8% AgentDojo ASR@800 under the AttackerMovesSecond attack. Moreover, our defended model shows no noticeable reduction in benign utility in nine benchmarks covering agentic tool calling, instruction following, science, and math.
-
 [Sizhe Chen](https://sizhe-chen.github.io), [Yibo Peng](https://pppyb.github.io/), [Jaewon Chang](https://www.jaewon.io/), [Chawin Sitawarin](https://chawin.sitawarin.com/), [David Wagner](https://people.eecs.berkeley.edu/~daw)
 
-[Paper](https://arxiv.org/abs/2610.41998)
+[![Paper](https://img.shields.io/badge/Paper-a8c66c)](https://arxiv.org/abs/2610.41998)
+
+Recognized as a top threat to AI agents, prompt injection allows instructions from untrusted data (email, documents, websites) to manipulate the agent’s operation. The existing best-defended LLM, Meta-SecAlign, is trained with the DPO loss but still suffers from attack success rates (ASRs) approaching 100% under adaptive prompt injections. One reason is that DPO anchors the model around the undefended reference model, which is insecure. We show an idealized reference model—an injection-invariant, utility-preserving oracle—can nevertheless be approximated, as its output distribution in training is interestingly accessible. This new observation motivates a theoretically principled SecPO loss. Another Meta-SecAlign shortcoming is that it trains on weak simulated attacks. We implement an efficient adversarial training (AT) pipeline that synthesizes strong injected inputs (best@240), and train the model on them. Our AT reduces ASRs by 1.5–14.5× across three SoTA adaptive attacks, compared with Meta-SecAlign; the SecPO loss reduces them by a further 2.4–4.6× compared with using DPO loss. In agentic workflows, our SecPO + AT Qwen3.6-27B is much more secure than Meta-SecAlign: 8.8% vs. 78.8% AgentDojo ASR@800 under the AttackerMovesSecond attack. Moreover, our defended model shows no noticeable reduction in benign utility in nine benchmarks covering agentic tool calling, instruction following, science, and math.
 
 Links to our open model checkpoints.
 
@@ -13,8 +13,6 @@ Links to our open model checkpoints.
 | Llama-3.1-8B | [Model](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) | |
 | Qwen3.6-27B | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Thinking-SecOPD) |
 | Qwen3.8-27B | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Instruct-SecPO) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Thinking-SecOPD) |
-
-The Qwen3.8-27B Meta-SecAlign repository is a public placeholder; weights are pending.
 
 # Environment Setup
 
@@ -173,11 +171,10 @@ differ only in their simulated injections.
 | Training data | Dataset |
 | --- | --- |
 | Llama-3.1-8B SecPO | [Llama-3.1-8B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO-trainset) |
-| Qwen3.6-27B SecPO and optimized-data SecOPD | [Qwen3.6-27B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-trainset) |
+| Qwen3.6-27B SecPO | [Qwen3.6-27B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-trainset) |
 | Qwen3.8-27B SecPO | [Qwen3.8-27B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.8-27B-Instruct-SecPO-trainset) |
-| Qwen3.8-27B SecOPD | [Qwen3.8-27B-Thinking-SecOPD-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.8-27B-Thinking-SecOPD-trainset) |
 
-All four datasets are public. When adapting the preference data to a new model,
+The listed datasets are public. When adapting the preference data to a new model,
 [generate that model's own response labels](docs/TRAINING.md#generate-model-specific-response-labels)
 and render the training prompts with its tokenizer and chat template.
 
@@ -195,3 +192,17 @@ The separately released
 [bitsandbytes INT8 checkpoint](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit)
 uses a different quantization format; the measurements above are for the
 llama.cpp Q8_0 conversion.
+
+# Citation
+
+```bibtex
+@misc{chen2026secpo,
+  title         = {{SecPO}: Principled Adversarial Training for Prompt Injection Security},
+  author        = {Chen, Sizhe and Peng, Yibo and Chang, Jaewon and Sitawarin, Chawin and Wagner, David},
+  year          = {2026},
+  eprint        = {2610.41998},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CR},
+  url           = {https://arxiv.org/abs/2610.41998}
+}
+```
