@@ -1,14 +1,20 @@
 # SecPO: Principled Adversarial Training for Prompt Injection Security
 
-[Sizhe Chen](https://sizhe-chen.github.io), [Yibo Peng](https://openreview.net/profile?id=~Yibo_Peng3), Jaewon Chang, [Chawin Sitawarin](https://openreview.net/profile?id=~Chawin_Sitawarin1), [David Wagner](https://people.eecs.berkeley.edu/~daw)
+Recognized as a top threat to AI agents, prompt injection allows instructions from untrusted data (email, documents, websites) to manipulate the agent’s operation. The existing best-defended LLM, Meta-SecAlign, is trained with the DPO loss but still suffers from attack success rates (ASRs) approaching 100% under adaptive prompt injections. One reason is that DPO anchors the model around the undefended reference model, which is insecure. We show an idealized reference model—an injection-invariant, utility-preserving oracle—can nevertheless be approximated, as its output distribution in training is interestingly accessible. This new observation motivates a theoretically principled SecPO loss. Another Meta-SecAlign shortcoming is that it trains on weak simulated attacks. We implement an efficient adversarial training (AT) pipeline that synthesizes strong injected inputs (best@240), and train the model on them. Our AT reduces ASRs by 1.5–14.5× across three SoTA adaptive attacks, compared with Meta-SecAlign; the SecPO loss reduces them by a further 2.4–4.6× compared with using DPO loss. In agentic workflows, our SecPO + AT Qwen3.6-27B is much more secure than Meta-SecAlign: 8.8% vs. 78.8% AgentDojo ASR@800 under the AttackerMovesSecond attack. Moreover, our defended model shows no noticeable reduction in benign utility in nine benchmarks covering agentic tool calling, instruction following, science, and math.
 
-[![Paper](https://img.shields.io/badge/Paper-a8c66c)](https://arxiv.org/abs/2610.41998) [![Llama SecPO](https://img.shields.io/badge/Llama%20SecPO--8B-FFD21E)](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) [![Qwen SecPO](https://img.shields.io/badge/Qwen%20SecPO--27B-FFD21E)](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) [![Qwen SecOPD](https://img.shields.io/badge/Qwen%20SecOPD--27B-FFD21E)](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Thinking-SecOPD)
+[Sizhe Chen](https://sizhe-chen.github.io), [Yibo Peng](https://pppyb.github.io/), [Jaewon Chang](https://www.jaewon.io/), [Chawin Sitawarin](https://chawin.sitawarin.com/), [David Wagner](https://people.eecs.berkeley.edu/~daw)
 
-SecPO combines a clean-input reference objective with adversarial training to
-secure LLMs against prompt injection while preserving task utility. On
-Qwen3.6-27B, AgentDojo adaptive ASR@800 drops from **78.8% with Meta-SecAlign
-to 8.8% with SecPO**. Our released optimized injections can be reused to train
-other models without repeating attack generation.
+[Paper](https://arxiv.org/abs/2610.41998)
+
+Links to our open model checkpoints.
+
+| Base model | Meta-SecAlign | SecPO | SecOPD |
+| --- | --- | --- | --- |
+| Llama-3.1-8B | [Model](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) | |
+| Qwen3.6-27B | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Thinking-SecOPD) |
+| Qwen3.8-27B | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Instruct-SecPO) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Thinking-SecOPD) |
+
+The Qwen3.8-27B Meta-SecAlign checkpoint is currently unavailable at its linked URL.
 
 # Environment Setup
 
@@ -97,7 +103,19 @@ Across Genetic ASR@800, TAP ASR@800, and PISmith ASR@10, mean SEP ASR falls
 from **89.6% to 10.5%** for Llama and **92.6% to 9.2%** for Qwen, comparing
 Meta-SecAlign with SecPO. See [all results and evaluation sizes](docs/PERFORMANCE.md).
 
-## Utility and Other Agent Benchmarks
+## Static Agent Benchmarks: AgentDyn and DTaP
+
+- **AgentDyn:** evaluate static prompt injections in dynamic agent
+  environments using the [AgentDyn setup and evaluation guide](docs/AGENTDYN.md).
+- **DTaP-Bench-Indirect:** evaluate 1,838 indirect-injection scenarios using
+  the [DTaP setup and evaluation guide](docs/DTAP.md). DTaP also reports
+  **utility under attack**.
+
+For Qwen3.6-27B with thinking disabled, static ASR falls from **4.8% to 0.0%**
+on AgentDyn and **45.9% to 7.6%** on DTaP, comparing Meta-SecAlign with SecPO.
+See [Performance](docs/PERFORMANCE.md) for the complete comparisons.
+
+## Utility Benchmarks on Benign Inputs
 
 - **MMLU-Pro, GPQA Diamond, GSM8K, and Minerva MATH:** use
   [`evaluate_lm_eval_utility.py`](scripts/evaluate_lm_eval_utility.py) with the
@@ -107,8 +125,9 @@ Meta-SecAlign with SecPO. See [all results and evaluation sizes](docs/PERFORMANC
   then use [`evaluate_reference_utility.py`](scripts/evaluate_reference_utility.py)
   with the fixed comparator outputs. Both report **raw win rate**; see the
   [reference evaluation guide](docs/REFERENCE_UTILITY.md).
-- **AgentDyn and DTaP:** follow the [AgentDyn](docs/AGENTDYN.md) and
-  [DTaP](docs/DTAP.md) setup and evaluation guides.
+- **AgentDojo and AgentDyn utility:** run the benign task evaluations
+  described in the [AgentDojo](docs/AGENTDOJO.md) and
+  [AgentDyn](docs/AGENTDYN.md) guides.
 
 Mean utility across the six instruction-following, science, and math
 benchmarks is **47.5% vs. 46.9%** for Llama SecPO vs. undefended, and
@@ -138,18 +157,41 @@ For Llama-3.1-8B online training, prepare Llama-specific labels, start the
 [current-policy PAIR workers](docs/LLAMA31_CURRENT_POLICY_PAIR.md), then run
 [`train_llama31_8b_online.sh`](scripts/train_llama31_8b_online.sh). See
 [Training](docs/TRAINING.md) for the objective, data commands, and model merge.
-Released data: [Llama](https://huggingface.co/datasets/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO-trainset)
-and [Qwen](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-trainset).
 
-# Code Acknowledgements
+# Optimized Training Data
 
-SecPO builds on [Meta-SecAlign](https://github.com/facebookresearch/Meta_SecAlign)
-and [SecAlign](https://github.com/facebookresearch/SecAlign). Evaluation
-integrates [AgentDojo](https://github.com/ethz-spylab/agentdojo), AgentDyn,
-DTaP, Qwen-Agent, and lm-evaluation-harness; see
-[third-party acknowledgements](docs/THIRD_PARTY.md) and
-[implementation provenance](docs/SOURCE_TO_RELEASE_MAP.md).
+Our optimized training sets reuse strong injections generated during online
+adversarial training of Llama-3.1-8B-Instruct, so other models can be trained
+without running attack generation again. Offline SecPO training transfers
+these security gains to Qwen3.6-27B while preserving utility.
 
-Project-owned code is [Apache-2.0](LICENSE). Models, datasets, and third-party
-components retain their own terms. [Citation](CITATION.bib) ·
-[Reproducibility](REPRODUCIBILITY.md) · [Release scope](docs/RELEASE_SCOPE.md).
+The data also improve SecOPD on-policy distillation: replacing its unoptimized
+injections with ours reduces Qwen3.6-27B SEP and DTaP ASRs by **2.5–22.5×**,
+with no noticeable overall utility cost. In that comparison, the datasets
+differ only in their simulated injections.
+
+| Training data | Dataset |
+| --- | --- |
+| Llama-3.1-8B SecPO | [Llama-3.1-8B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO-trainset) |
+| Qwen3.6-27B SecPO and optimized-data SecOPD | [Qwen3.6-27B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-trainset) |
+| Qwen3.8-27B SecPO | [Qwen3.8-27B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.8-27B-Instruct-SecPO-trainset) |
+| Qwen3.8-27B SecOPD | [Qwen3.8-27B-Thinking-SecOPD-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.8-27B-Thinking-SecOPD-trainset) |
+
+All four datasets are public. When adapting the preference data to a new model,
+[generate that model's own response labels](docs/TRAINING.md#generate-model-specific-response-labels)
+and render the training prompts with its tokenizer and chat template.
+
+# Quantized Inference
+
+An **8-bit Q8_0** conversion of the defended Qwen3.6-27B runs with
+[llama.cpp](https://github.com/ggml-org/llama.cpp) on a **single RTX 5090
+with 32 GB of memory**. Reusing the existing DFlash drafter without additional
+training increases decoding throughput by **2.66× on AgentDojo** and **2.63×
+on AgentDyn**, compared with the same quantized model without speculative
+decoding. The Q8_0 model records **0.0% observed static ASR on both benchmarks**,
+with and without speculative decoding.
+
+The separately released
+[bitsandbytes INT8 checkpoint](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit)
+uses a different quantization format; the measurements above are for the
+llama.cpp Q8_0 conversion.
