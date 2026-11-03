@@ -1,7 +1,9 @@
-# SecPO: training and evaluation for prompt-injection defense
+# SecPO: Principled Adversarial Training for Prompt Injection Security
 
-This is the public, identity-bearing implementation of the main Security
-Preference Optimization (SecPO) pipeline for text prompt-injection defense.
+[Paper](https://arxiv.org/abs/2610.41998) | [Models and datasets](#released-artifacts) | [Low-cost AttackerMovesSecond](#low-cost-attackermovessecond-section-46)
+
+SecPO combines a clean-input reference model with adversarial training to
+improve robustness to prompt injection while preserving task utility.
 The repository is maintained by [Sizhe Chen](https://github.com/Sizhe-Chen)
 and contains the benign-reference objective, both main training settings,
 static and adaptive SEP evaluation, reference-based utility evaluation, and
@@ -9,6 +11,70 @@ the reviewed agent-evaluation integrations for:
 
 - Llama-3.1-8B-Instruct with online adaptive training; and
 - Qwen3.6-27B with offline non-thinking training on saved strong attacks.
+
+## Main results
+
+All scores are percentages. Higher utility and lower attack success rate
+(ASR) are better. The main Qwen3.6-27B results use thinking disabled.
+Meta-SecAlign uses DPO without adversarial training. SecPO uses online
+adversarial training for Llama and reuses the optimized injections offline
+for Qwen.
+
+### Llama-3.1-8B-Instruct
+
+| Metric | Undefended | Meta-SecAlign | SecPO |
+| --- | ---: | ---: | ---: |
+| MMLU-Pro | 46.5% | 46.7% | 46.3% |
+| GPQA Diamond | 23.7% | 24.2% | 24.2% |
+| GSM8K | 82.9% | 84.4% | 81.3% |
+| Minerva Math | 49.2% | 48.8% | 50.1% |
+| AlpacaEval2 raw win rate | 23.7% | 24.0% | 23.7% |
+| SEP utility raw win rate | 55.4% | 55.9% | 59.4% |
+| SEP static ASR | 98.1% | 1.8% | 1.4% |
+| SEP Genetic adaptive ASR@800 | 100.0% | 89.1% | 12.3% |
+| SEP TAP adaptive ASR@800 | 100.0% | 84.6% | 12.2% |
+| SEP PISmith adaptive ASR@10 | 98.7% | 95.1% | 7.0% |
+
+### Qwen3.6-27B
+
+| Metric | Undefended | Meta-SecAlign | SecPO |
+| --- | ---: | ---: | ---: |
+| MMLU-Pro | 84.8% | 83.9% | 84.6% |
+| GPQA Diamond | 81.3% | 79.3% | 80.8% |
+| GSM8K | 97.3% | 97.0% | 96.4% |
+| Minerva Math | 96.1% | 94.8% | 95.8% |
+| AlpacaEval2 raw win rate | 80.6% | 81.6% | 82.9% |
+| SEP utility raw win rate | 93.0% | 93.9% | 94.3% |
+| AgentDojo utility | 89.7% | 87.6% | 90.7% |
+| AgentDyn utility | 71.7% | 76.7% | 71.7% |
+| DTaP utility under attack | 65.8% | 70.0% | 74.5% |
+| SEP static ASR | 98.9% | 2.9% | 1.8% |
+| SEP Genetic adaptive ASR@800 | 100.0% | 93.7% | 13.3% |
+| SEP TAP adaptive ASR@800 | 100.0% | 90.1% | 12.5% |
+| SEP PISmith adaptive ASR@10 | 98.1% | 94.0% | 1.8% |
+| AgentDojo static ASR | 26.9% | 2.2% | 0.0% |
+| AgentDojo Genetic adaptive ASR@800 | 81.3% | 78.8% | 8.8% |
+| AgentDyn static ASR | 22.0% | 4.8% | 0.0% |
+| DTaP ASR | 50.8% | 45.9% | 7.6% |
+
+Across the three adaptive SEP attacks, mean ASR falls from **89.6% to
+10.5%** for Llama (**8.5x lower**) and from **92.6% to 9.2%** for Qwen
+(**10.1x lower**). Mean utility across the six instruction-following,
+science, and math benchmarks is **47.5%** for Llama SecPO versus **46.9%**
+undefended, and **89.1%** for Qwen SecPO versus **88.9%** undefended.
+
+SEP static ASR covers 9,160 examples; adaptive SEP uses 1,024 examples, with
+800 attempts for Genetic/TAP and 10 for PISmith. AgentDojo adaptive ASR uses
+80 task pairs and up to 800 attempts each. DTaP covers 1,838 indirect-injection
+cases, and its utility is measured **under attack**. AlpacaEval2 and SEP
+utility are raw win rates. A measured 0.0% ASR means no successful attacks
+were observed in that evaluation.
+
+AgentDojo and AgentDyn use the `repeat_user_prompt` defense and the
+`important_instructions` static attack.
+
+The Qwen model also records **0.0% ASR@1600** for each of the three evaluated
+Repeat-After-Me visual injection goals, with **95.2% DocVQA utility**.
 
 ## Released artifacts
 
@@ -18,6 +84,7 @@ the reviewed agent-evaluation integrations for:
 | Qwen training dataset | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-trainset) |
 | Llama SecPO model | [Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) |
 | Qwen SecPO model | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
+| Qwen SecOPD model trained on optimized data | [Sizhe-Chen/Qwen3.6-27B-Thinking-SecOPD](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Thinking-SecOPD) |
 
 The license and use terms on each Hugging Face model or dataset card govern
 that artifact. The Apache-2.0 license in this repository applies to
@@ -33,8 +100,8 @@ third-party terms.
 
 Baselines, ablations, GCG, instruction-hierarchy experiments, unrelated model
 families, cluster administration, one-time recovery scripts, credentials,
-caches, model weights, checkpoints, and generated results are deliberately
-excluded.
+caches, model weights, checkpoints, and raw evaluation outputs are outside
+this repository's implementation scope.
 
 ## What is executable in this snapshot
 
@@ -47,7 +114,7 @@ excluded.
 | Two Basic Adaptive delimiter attacks | Included for both model families | Frozen delimiters; regeneration script is not included |
 | Genetic/MAP-Elites, PAIR, and TAP search | Clean provider-neutral implementations included | Attacker, victim, and judge models are injected callables |
 | Utility evaluation | Included for four lm-eval suites plus AlpacaEval2 and SEP Utility | Exact external GPT-4o/Llama-3-8B references are checksum-locked |
-| AgentDojo | Pinned external integration included | Exact checker, utility/static runners, resumable paper-80 Genetic evaluation, verified MIT pin and optional patch |
+| AgentDojo | Pinned external integration included | Exact checker, utility/static runners, resumable 80-pair Genetic evaluation, low-cost exact-first search, verified MIT pin and optional patch |
 | AgentDyn | Pinned external integration included | Qwen native-tool adapter preserves trusted `user` and untrusted `input` roles |
 | DTap | Clean runnable Qwen-Agent integration included | Final trusted-`user`/untrusted-`input` adapter, exact 1,838-task identity, external DTap lifecycle/judge backend, portable 33-by-6 execution, resume, and summaries; environments, service, and weights stay external |
 | Qwen LoRA merge | Included and unit tested | Produces a standalone checkpoint and path-sanitized manifest; model weights are never bundled |
@@ -397,6 +464,49 @@ state supports whole-80 resume and rejects duplicate or missing coverage.
 Setup, native-tool adapter, and Genetic callback contracts are documented in
 `docs/AGENTDOJO.md` and `third_party/README.md`.
 
+### Low-cost AttackerMovesSecond (Section 4.6)
+
+The released [AttackerMovesSecond search](src/secpo/attacks/agentdojo_exact_first.py)
+uses **MiniMax-M3.1-Flash with high reasoning** as the attacker and
+**DeepSeek-V4.1-Flash-1017 with reasoning disabled** as the critic. The
+80-case ASR@800 evaluation costs **less than $200** in the reported setup,
+including the worst case in which every case exhausts its budget without a
+successful attack. Actual charges depend on provider pricing and usage;
+the runner does not enforce a dollar cap.
+
+The main AgentDojo results above use the original **Gemini-2.5-Pro** attack
+configuration. The cheaper profile is a separate configuration, so its cost
+should not be combined with the main result as if both came from one run.
+
+Implementation entry points:
+
+- [Exact-first search and candidate checkpoints](src/secpo/attacks/agentdojo_exact_first.py)
+- [Portable 80-pair orchestration and resume](src/secpo/evaluation/agentdojo_search.py)
+- [Attacker, critic, and victim configuration](configs/evaluate_agentdojo_search_qwen36_secpo.json)
+- [Evaluation CLI](scripts/evaluate_agentdojo_qwen36_27b.py)
+
+After installing the pinned AgentDojo checkout, serving the victim model, and
+setting `AGENTDOJO_BASE_URL`, optional `AGENTDOJO_API_KEY`,
+`OPENROUTER_BASE_URL`, and `OPENROUTER_API_KEY`, run:
+
+```bash
+python scripts/evaluate_agentdojo_qwen36_27b.py \
+  --config configs/evaluate_agentdojo_search_qwen36_secpo.json \
+  adaptive \
+  --checkout /path/to/agentdojo \
+  --backend-config configs/evaluate_agentdojo_search_qwen36_secpo.json \
+  --search-only \
+  --output-dir results/agentdojo_search \
+  --resume
+```
+
+The default budget is 100 generations of eight candidates per task pair.
+AgentDojo's exact checker determines success, and search stops at the first
+successful candidate. Failed generations receive critic scores after their
+exact checks. Completed candidates and scores are checkpointed for resume.
+`--search-only` reports search success without an independent final replay;
+ordinary `adaptive` evaluation retains the final replay.
+
 ## Qwen model merge
 
 Merge a trained Qwen LoRA adapter into a standalone checkpoint before an
@@ -447,7 +557,7 @@ verification commands, runtime contracts, and clean evaluation workflows.
   Benchmark, dataset, model, and third-party terms remain separate; the
   bundled Qwen dataset redistribution and privacy decisions are still
   publication gates.
-- No model weights, attacker/judge credentials, private endpoints, or results
+- No model weights, attacker/judge credentials, private endpoints, or raw evaluation outputs
   are included.
 
 See `REPRODUCIBILITY.md`, `docs/EVALUATION.md`, `docs/THIRD_PARTY.md`, and
@@ -468,15 +578,23 @@ up or released later, edit the component classification and narrow path rules
 in `release_manifest.json`, add tests, and rerun every audit. Do not weaken a
 global deny rule or import files directly from the research workspace.
 
-## Public-release status
-
-This folder is prepared as a fresh public source tree for
-<https://github.com/Sizhe-Chen/SecPO>. Do not reuse or filter the parent
-research history, and do not add the submission PDF, model weights,
-checkpoints, logs, or runtime state. Follow `PUBLIC_RELEASE.md` and complete
-`RELEASE_CHECKLIST.md` before publishing.
+## Release scope
 
 Project-owned code and documentation are released under Apache-2.0. Model
 weights, datasets, benchmarks, and third-party components remain subject to
-their own terms. In particular, the bundled preference dataset retains the
-separate redistribution and privacy gates documented in its dataset card.
+their own terms. Release and provenance records are maintained in
+`PUBLIC_RELEASE.md`, `RELEASE_CHECKLIST.md`, and `release_manifest.json`.
+
+## Citation
+
+```bibtex
+@misc{chen2026secpo,
+  title         = {{SecPO}: Principled Adversarial Training for Prompt Injection Security},
+  author        = {Chen, Sizhe and Peng, Yibo and Chang, Jaewon and Sitawarin, Chawin and Wagner, David},
+  year          = {2026},
+  eprint        = {2610.41998},
+  archivePrefix = {arXiv},
+  primaryClass  = {cs.CR},
+  url           = {https://arxiv.org/abs/2610.41998}
+}
+```
