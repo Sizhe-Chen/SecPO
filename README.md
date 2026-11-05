@@ -290,62 +290,6 @@ and 80 task pairs for adaptive attacks. The static attack is
   </tbody>
 </table>
 
-<details>
-<summary>Victim queries and Cost ($) of successful AgentDojo Genetic attacks</summary>
-
-Query and cost statistics report means and medians conditioned on successful
-attacks under the 80-example, Pass@800 protocol. These costs use the original
-Gemini-2.5-Pro configuration.
-
-<table width="100%">
-  <thead>
-    <tr>
-      <th align="left" width="600" rowspan="2">Target</th>
-      <th align="center" width="16%" rowspan="2">AgentDojo<br>ASR&nbsp;(↓)</th>
-      <th align="center" colspan="2">Victim queries</th>
-      <th align="center" colspan="2">Cost ($)</th>
-    </tr>
-    <tr>
-      <th align="center" width="14%">Mean</th>
-      <th align="center" width="14%">Median</th>
-      <th align="center" width="14%">Mean</th>
-      <th align="center" width="14%">Median</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="left"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></td>
-      <td align="right">81.3%</td>
-      <td align="right">26</td>
-      <td align="right">13</td>
-      <td align="right">0.88</td>
-      <td align="right">0.43</td>
-    </tr>
-    <tr>
-      <td align="left"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></td>
-      <td align="right">78.8%</td>
-      <td align="right">109</td>
-      <td align="right">53</td>
-      <td align="right">5.92</td>
-      <td align="right">2.56</td>
-    </tr>
-    <tr>
-      <td align="left"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></td>
-      <td align="right">8.8%</td>
-      <td align="right">227</td>
-      <td align="right">96</td>
-      <td align="right">34.90</td>
-      <td align="right">13.20</td>
-    </tr>
-  </tbody>
-</table>
-
-</details>
-
-See the [configuration](configs/evaluate_agentdojo_search_qwen36_secpo.json)
-and [AgentDojo guide](docs/AGENTDOJO.md) for the original search interface,
-static evaluation, checkpoints, and resume behavior.
-
 ## SEP Static and Adaptive Attacks
 
 [`evaluate_sep_static.py`](scripts/evaluate_sep_static.py) runs six static
@@ -432,10 +376,6 @@ counts as successful if any template succeeds. Each adaptive evaluation uses
   </tbody>
 </table>
 
-Across Genetic Adpt. ASR@800, TAP Adpt. ASR@800, and PISmith Adpt. ASR@10, mean SEP ASR falls
-from **89.6% to 10.5%** for Llama and **92.6% to 9.2%** for Qwen, comparing
-Meta-SecAlign with SecPO. See [all results and evaluation sizes](docs/PERFORMANCE.md).
-
 ## Static Agent Benchmarks: AgentDyn and DTaP
 
 - **AgentDyn:** evaluate static prompt injections in dynamic agent
@@ -483,7 +423,7 @@ AgentDyn v1.2.2 uses 560 injected cases with `important_instructions` and
 
 Repeat-After-Me iteratively optimizes instructions written on top of an image.
 The corresponding DocVQA images without injections measure utility.
-The code for these evaluations is not included in this repository, because Repeat-After-Me is undergoing Meta's everlasting open-source review.
+The code for these evaluations is not included in this repository, because Repeat-After-Me is undergoing Meta's open-source review.
 
 <table width="100%">
   <thead>
