@@ -161,14 +161,6 @@ present.
 | DTaP ASR (↓) | 50.8% | 45.9% | 7.6% |
 | DTaP Utility under attack (↑) | 65.8% | 70.0% | 74.5% |
 
-The DTaP subset results below report ASR (↓). The Semantically close subset
-contains 481 cases, and the Multiple injections subset contains 123 cases.
-
-| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
-| --- | ---: | ---: | ---: |
-| Semantically close subset | 58.8% | 55.1% | 12.3% |
-| Multiple injections subset | 51.2% | 33.3% | 3.3% |
-
 ## Utility Benchmarks on Benign Inputs
 
 - **MMLU-Pro, GPQA Diamond, GSM8K, and Minerva Math:** use
@@ -213,10 +205,11 @@ benchmarks is **47.5% vs. 46.9%** for Llama SecPO vs. undefended, and
 **89.1% vs. 88.9%** for Qwen. See [Performance](docs/PERFORMANCE.md) for the
 combined results and evaluation settings.
 
-## Security generalization to multimodal tasks
+## Security against adaptive visual prompt injections
 
 Repeat-After-Me iteratively optimizes instructions written on top of an image.
 The corresponding DocVQA images without injections measure utility.
+The code for these evaluations is not included in this repository.
 
 | Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
 | --- | ---: | ---: | ---: |
@@ -224,19 +217,6 @@ The corresponding DocVQA images without injections measure utility.
 | Steal-PII ASR@1600 (↓) | 100.0% | 100.0% | 0.0% |
 | Call-Tool ASR@1600 (↓) | 96.0% | 77.0% | 0.0% |
 | OpenClaw ASR@1600 (↓) | 80.0% | 92.0% | 0.0% |
-
-## Robustness to white-box attacks
-
-White-box attack success rates (ASR ↓) require access beyond the black-box
-threat model: Basic Adaptive uses model embedding weights, and GCG uses
-complete weights. The columns below compare the undefended checkpoint,
-Meta-SecAlign with static simulated attacks, and SecPO with adaptive simulated
-attacks.
-
-| Metric | [meta-llama/Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) | [Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) |
-| --- | ---: | ---: | ---: |
-| Basic Adaptive | 97.1% | 33.0% | 10.6% |
-| GCG | 87.0% | 20.7% | 5.8% |
 
 # Defensive Fine-Tuning (SecPO)
 
@@ -285,7 +265,9 @@ The listed datasets are public. When adapting the preference data to a new model
 [generate that model's own response labels](docs/TRAINING.md#generate-model-specific-response-labels)
 and render the training prompts with its tokenizer and chat template.
 
-# Quantized Inference
+# Quantized Models and Speculative Decoding
+
+Quantized model: [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit).
 
 An **8-bit Q8_0** conversion of the defended Qwen3.6-27B runs with
 [llama.cpp](https://github.com/ggml-org/llama.cpp) on a **single RTX 5090
@@ -307,10 +289,8 @@ decoding (SD):
 | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | Q8_0 + SD | 11.6% | 15.5% |
 | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | Q8_0 + SD | 0.0% | 0.0% |
 
-The separately released
-[bitsandbytes INT8 checkpoint](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit)
-uses a different quantization format; the measurements above are for the
-llama.cpp Q8_0 conversion.
+The released checkpoint uses bitsandbytes INT8; the measurements above are
+for the llama.cpp Q8_0 conversion.
 
 # Citation
 
