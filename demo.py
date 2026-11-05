@@ -70,11 +70,12 @@ for model_id in ("Qwen/Qwen3.6-27B", SECPO_MODEL):
     )
 
     # Example 3: Strong injection in agentic tool-calling.
-    # Tool returns use input; display generated calls without executing them.
+    # Base Qwen uses tool returns; SecPO uses input. Calls are only displayed.
     agentdojo = json.loads(
         (Path(__file__).parent / "examples/agentdojo_tool_attack.json").read_text(encoding="utf-8")
     )
-    conversation = agentdojo["messages"]
+    conversation = [message.copy() for message in agentdojo["messages"]]
+    conversation[-1]["role"] = "input" if model_id == SECPO_MODEL else "tool"
     inputs = tokenizer.apply_chat_template(
         conversation, tools=agentdojo["tools"], tokenize=True, add_generation_prompt=True,
         enable_thinking=False, return_dict=True, return_tensors="pt",

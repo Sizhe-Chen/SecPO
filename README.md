@@ -154,7 +154,9 @@ message.
 
 In a common agentic setup, tool returns are untrusted data. We test this setting
 with an [AgentDojo example](examples/agentdojo_tool_attack.json) that places a
-calendar result containing a prompt injection in `input`:
+calendar result containing a prompt injection in `input` for defended models.
+In `demo.py`, the undefended Qwen model receives the same tool return with role
+`tool`; the example below shows the defended model's `input` format:
 
 ```python
 import json
