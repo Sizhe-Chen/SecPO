@@ -1,8 +1,8 @@
 # SecPO: Principled Adversarial Training for Prompt Injection Security
 
-[Sizhe Chen](https://sizhe-chen.github.io), [Yibo Peng](https://pppyb.github.io/), [Jaewon Chang](https://www.jaewon.io/), [Chawin Sitawarin](https://chawin.sitawarin.com/), [David Wagner](https://people.eecs.berkeley.edu/~daw)
+[[Paper]](https://arxiv.org/pdf/2610.41998)
 
-[![Paper](https://img.shields.io/badge/Paper-a8c66c)](https://arxiv.org/abs/2610.41998)
+[Sizhe Chen](https://sizhe-chen.github.io), [Yibo Peng](https://pppyb.github.io/), [Jaewon Chang](https://www.jaewon.io/), [Chawin Sitawarin](https://chawin.sitawarin.com/), [David Wagner](https://people.eecs.berkeley.edu/~daw)
 
 Recognized as a top threat to AI agents, prompt injection allows instructions from untrusted data (email, documents, websites) to manipulate the agent’s operation. The existing best-defended LLM, Meta-SecAlign, is trained with the DPO loss but still suffers from attack success rates (ASRs) approaching 100% under adaptive prompt injections. One reason is that DPO anchors the model around the undefended reference model, which is insecure. We show an idealized reference model—an injection-invariant, utility-preserving oracle—can nevertheless be approximated, as its output distribution in training is interestingly accessible. This new observation motivates a theoretically principled SecPO loss. Another Meta-SecAlign shortcoming is that it trains on weak simulated attacks. We implement an efficient adversarial training (AT) pipeline that synthesizes strong injected inputs (best@240), and train the model on them. Our AT reduces ASRs by 1.5–14.5× across three SoTA adaptive attacks, compared with Meta-SecAlign; the SecPO loss reduces them by a further 2.4–4.6× compared with using DPO loss. In agentic workflows, our SecPO + AT Qwen3.6-27B is much more secure than Meta-SecAlign: 8.8% vs. 78.8% AgentDojo ASR@800 under the AttackerMovesSecond attack. Moreover, our defended model shows no noticeable reduction in benign utility in nine benchmarks covering agentic tool calling, instruction following, science, and math.
 
@@ -10,7 +10,7 @@ Links to our open model checkpoints.
 
 | Base model | Meta-SecAlign | SecPO | SecOPD |
 | --- | --- | --- | --- |
-| Llama-3.1-8B | [Model](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) | |
+| Llama-3.1-8B-Instruct | [Model](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) | |
 | Qwen3.6-27B | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Thinking-SecOPD) |
 | Qwen3.8-27B | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Instruct-SecPO) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Thinking-SecOPD) |
 
@@ -42,16 +42,56 @@ python setup.py
 
 # Demo
 
-[`demo.py`](demo.py) compares the undefended Qwen3.6-27B with the released
-SecPO checkpoint on an attacked movie-summary request, using the same SecPO
-chat template and thinking disabled for both. It replays a saved
-adaptive injection that attempts to redirect an *Avengers: Endgame* summary into a
-robotic-gardener story. This is an optimized training example, not a held-out
-evaluation. Trusted instructions use `user`; untrusted content uses `input`.
+[`demo.py`](demo.py) compares [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B)
+with [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO)
+on an attacked movie-summary request. It replays a saved adaptive injection
+from training that claims to be a "SYSTEM UPDATE" and attempts to redirect an
+*Avengers: Endgame* summary into a two-sentence story about a robotic gardener.
+
+After completing the environment setup, run:
 
 ```bash
 python demo.py
 ```
+
+The script loads one model at a time with `AutoModelForImageTextToText` and
+prints each generated response under its full model ID. The SecPO weights
+are already merged; no separate LoRA adapter is needed. Both models use the
+SecPO tokenizer and chat template with thinking disabled. Generation is
+greedy (`do_sample=False`) and limited to 512 new tokens.
+
+SecPO requires trusted instructions in `user` and untrusted text, documents,
+or tool returns in `input`. The demo formats its request as follows:
+
+```python
+from transformers import AutoTokenizer
+
+conversation = [
+    {"role": "user", "content": instruction},
+    {"role": "input", "content": injection + " " + data},
+]
+tokenizer = AutoTokenizer.from_pretrained(
+    "Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO"
+)
+inputs = tokenizer.apply_chat_template(
+    conversation,
+    tokenize=True,
+    add_generation_prompt=True,
+    enable_thinking=False,
+    return_dict=True,
+    return_tensors="pt",
+)
+```
+
+A movie summary follows the trusted task; a robotic-gardener story follows
+the injection. This saved training example illustrates the interface and
+is not a held-out evaluation.
+
+When adapting the demo to your own inputs, keep attacker-controlled content
+out of `system` and `user` messages, and prevent special chat delimiters in
+untrusted content from escaping the `input` role. See
+[Secure Inference with SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO#secure-inference-with-secpo)
+for the vLLM example and application integration guidance.
 
 # Evaluation
 
@@ -257,7 +297,7 @@ differ only in their simulated injections.
 
 | Training data | Dataset |
 | --- | --- |
-| Llama-3.1-8B SecPO | [Llama-3.1-8B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO-trainset) |
+| Llama-3.1-8B-Instruct SecPO | [Llama-3.1-8B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO-trainset) |
 | Qwen3.6-27B SecPO | [Qwen3.6-27B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-trainset) |
 | Qwen3.8-27B SecPO | [Qwen3.8-27B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.8-27B-Instruct-SecPO-trainset) |
 
