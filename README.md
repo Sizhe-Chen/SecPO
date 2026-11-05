@@ -6,11 +6,36 @@ Recognized as a top threat to AI agents, prompt injection allows instructions fr
 
 Links to our open model checkpoints.
 
-| Base model | Meta-SecAlign | SecPO | SecOPD |
-| --- | --- | --- | --- |
-| Llama-3.1-8B-Instruct | [Model](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) | |
-| Qwen3.6-27B | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Thinking-SecOPD) |
-| Qwen3.8-27B | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Instruct-MetaSecAlign) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Instruct-SecPO) | [Model](https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Thinking-SecOPD) |
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="left" width="329">Base model</th>
+      <th align="center" width="20%">Meta-SecAlign</th>
+      <th align="center" width="20%">SecPO</th>
+      <th align="center" width="20%">SecOPD</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">Llama-3.1-8B-Instruct</td>
+      <td align="center"><a href="https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign">Model</a></td>
+      <td align="center"><a href="https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO">Model</a></td>
+      <td align="center"></td>
+    </tr>
+    <tr>
+      <td align="left">Qwen3.6-27B</td>
+      <td align="center"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Model</a></td>
+      <td align="center"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Model</a></td>
+      <td align="center"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Thinking-SecOPD">Model</a></td>
+    </tr>
+    <tr>
+      <td align="left">Qwen3.8-27B</td>
+      <td align="center"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Instruct-MetaSecAlign">Model</a></td>
+      <td align="center"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Instruct-SecPO">Model</a></td>
+      <td align="center"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.8-27B-Thinking-SecOPD">Model</a></td>
+    </tr>
+  </tbody>
+</table>
 
 # Environment Setup
 
@@ -234,11 +259,36 @@ AgentDojo v1.2.1 uses 97 tasks for utility, 949 task pairs for static attacks,
 and 80 task pairs for adaptive attacks. The static attack is
 `important_instructions`; the defense is `repeat_user_prompt`.
 
-| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
-| --- | ---: | ---: | ---: |
-| AgentDojo Utility (↑) | 89.7% | 87.6% | 90.7% |
-| AgentDojo ASR (↓) | 26.9% | 2.2% | 0.0% |
-| AgentDojo Genetic Adpt. ASR@800 (↓) | 81.3% | 78.8% | 8.8% |
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="left" width="230">Metric</th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">AgentDojo Utility&nbsp;(↑)</td>
+      <td align="right">89.7%</td>
+      <td align="right">87.6%</td>
+      <td align="right">90.7%</td>
+    </tr>
+    <tr>
+      <td align="left">AgentDojo ASR&nbsp;(↓)</td>
+      <td align="right">26.9%</td>
+      <td align="right">2.2%</td>
+      <td align="right">0.0%</td>
+    </tr>
+    <tr>
+      <td align="left">AgentDojo Genetic Adpt.<br>ASR@800&nbsp;(↓)</td>
+      <td align="right">81.3%</td>
+      <td align="right">78.8%</td>
+      <td align="right">8.8%</td>
+    </tr>
+  </tbody>
+</table>
 
 <details>
 <summary>Victim queries and Cost ($) of successful AgentDojo Genetic attacks</summary>
@@ -247,11 +297,48 @@ Query and cost statistics report means and medians conditioned on successful
 attacks under the 80-example, Pass@800 protocol. These costs use the original
 Gemini-2.5-Pro configuration.
 
-| Target | AgentDojo ASR (↓) | Victim queries<br>Mean | Victim queries<br>Median | Cost ($)<br>Mean | Cost ($)<br>Median |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | 81.3% | 26 | 13 | 0.88 | 0.43 |
-| [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | 78.8% | 109 | 53 | 5.92 | 2.56 |
-| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | 8.8% | 227 | 96 | 34.90 | 13.20 |
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="left" width="230" rowspan="2">Target</th>
+      <th align="center" width="16%" rowspan="2">AgentDojo<br>ASR&nbsp;(↓)</th>
+      <th align="center" colspan="2">Victim queries</th>
+      <th align="center" colspan="2">Cost ($)</th>
+    </tr>
+    <tr>
+      <th align="center" width="14%">Mean</th>
+      <th align="center" width="14%">Median</th>
+      <th align="center" width="14%">Mean</th>
+      <th align="center" width="14%">Median</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></td>
+      <td align="right">81.3%</td>
+      <td align="right">26</td>
+      <td align="right">13</td>
+      <td align="right">0.88</td>
+      <td align="right">0.43</td>
+    </tr>
+    <tr>
+      <td align="left"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></td>
+      <td align="right">78.8%</td>
+      <td align="right">109</td>
+      <td align="right">53</td>
+      <td align="right">5.92</td>
+      <td align="right">2.56</td>
+    </tr>
+    <tr>
+      <td align="left"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></td>
+      <td align="right">8.8%</td>
+      <td align="right">227</td>
+      <td align="right">96</td>
+      <td align="right">34.90</td>
+      <td align="right">13.20</td>
+    </tr>
+  </tbody>
+</table>
 
 </details>
 
@@ -271,19 +358,79 @@ SEP ASR uses 9,160 examples and six static attack templates; an example
 counts as successful if any template succeeds. Each adaptive evaluation uses
 1,024 examples, with 800 attempts for Genetic and TAP and 10 for PISmith.
 
-| Metric | [meta-llama/Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) | [Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) |
-| --- | ---: | ---: | ---: |
-| SEP ASR (↓) | 98.1% | 1.8% | 1.4% |
-| SEP Genetic Adpt. ASR@800 (↓) | 100.0% | 89.1% | 12.3% |
-| SEP TAP Adpt. ASR@800 (↓) | 100.0% | 84.6% | 12.2% |
-| SEP PISmith Adpt. ASR@10 (↓) | 98.7% | 95.1% | 7.0% |
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="left" width="230">Metric</th>
+      <th align="center" width="24%"><a href="https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct">meta-llama/<br>Llama-3.1-8B-<br>Instruct</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Llama-3.1-8B-<br>Instruct-MetaSecAlign</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO">Sizhe-Chen/<br>Llama-3.1-8B-<br>Instruct-SecPO</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">SEP ASR&nbsp;(↓)</td>
+      <td align="right">98.1%</td>
+      <td align="right">1.8%</td>
+      <td align="right">1.4%</td>
+    </tr>
+    <tr>
+      <td align="left">SEP Genetic Adpt.<br>ASR@800&nbsp;(↓)</td>
+      <td align="right">100.0%</td>
+      <td align="right">89.1%</td>
+      <td align="right">12.3%</td>
+    </tr>
+    <tr>
+      <td align="left">SEP TAP Adpt.<br>ASR@800&nbsp;(↓)</td>
+      <td align="right">100.0%</td>
+      <td align="right">84.6%</td>
+      <td align="right">12.2%</td>
+    </tr>
+    <tr>
+      <td align="left">SEP PISmith Adpt.<br>ASR@10&nbsp;(↓)</td>
+      <td align="right">98.7%</td>
+      <td align="right">95.1%</td>
+      <td align="right">7.0%</td>
+    </tr>
+  </tbody>
+</table>
 
-| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
-| --- | ---: | ---: | ---: |
-| SEP ASR (↓) | 98.9% | 2.9% | 1.8% |
-| SEP Genetic Adpt. ASR@800 (↓) | 100.0% | 93.7% | 13.3% |
-| SEP TAP Adpt. ASR@800 (↓) | 100.0% | 90.1% | 12.5% |
-| SEP PISmith Adpt. ASR@10 (↓) | 98.1% | 94.0% | 1.8% |
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="left" width="230">Metric</th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">SEP ASR&nbsp;(↓)</td>
+      <td align="right">98.9%</td>
+      <td align="right">2.9%</td>
+      <td align="right">1.8%</td>
+    </tr>
+    <tr>
+      <td align="left">SEP Genetic Adpt.<br>ASR@800&nbsp;(↓)</td>
+      <td align="right">100.0%</td>
+      <td align="right">93.7%</td>
+      <td align="right">13.3%</td>
+    </tr>
+    <tr>
+      <td align="left">SEP TAP Adpt.<br>ASR@800&nbsp;(↓)</td>
+      <td align="right">100.0%</td>
+      <td align="right">90.1%</td>
+      <td align="right">12.5%</td>
+    </tr>
+    <tr>
+      <td align="left">SEP PISmith Adpt.<br>ASR@10&nbsp;(↓)</td>
+      <td align="right">98.1%</td>
+      <td align="right">94.0%</td>
+      <td align="right">1.8%</td>
+    </tr>
+  </tbody>
+</table>
 
 Across Genetic Adpt. ASR@800, TAP Adpt. ASR@800, and PISmith Adpt. ASR@10, mean SEP ASR falls
 from **89.6% to 10.5%** for Llama and **92.6% to 9.2%** for Qwen, comparing
@@ -302,11 +449,36 @@ AgentDyn v1.2.2 uses 560 injected cases with `important_instructions` and
 160 macOS/Windows cases. DTaP Utility under attack is measured with injections
 present.
 
-| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
-| --- | ---: | ---: | ---: |
-| AgentDyn ASR (↓) | 22.0% | 4.8% | 0.0% |
-| DTaP ASR (↓) | 50.8% | 45.9% | 7.6% |
-| DTaP Utility under attack (↑) | 65.8% | 70.0% | 74.5% |
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="left" width="230">Metric</th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">AgentDyn ASR&nbsp;(↓)</td>
+      <td align="right">22.0%</td>
+      <td align="right">4.8%</td>
+      <td align="right">0.0%</td>
+    </tr>
+    <tr>
+      <td align="left">DTaP ASR&nbsp;(↓)</td>
+      <td align="right">50.8%</td>
+      <td align="right">45.9%</td>
+      <td align="right">7.6%</td>
+    </tr>
+    <tr>
+      <td align="left">DTaP Utility under attack&nbsp;(↑)</td>
+      <td align="right">65.8%</td>
+      <td align="right">70.0%</td>
+      <td align="right">74.5%</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Security against adaptive visual prompt injections
 
@@ -314,12 +486,42 @@ Repeat-After-Me iteratively optimizes instructions written on top of an image.
 The corresponding DocVQA images without injections measure utility.
 The code for these evaluations is not included in this repository.
 
-| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
-| --- | ---: | ---: | ---: |
-| DocVQA Utility (↑) | 96.0% | 95.8% | 95.2% |
-| Steal-PII ASR@1600 (↓) | 100.0% | 100.0% | 0.0% |
-| Call-Tool ASR@1600 (↓) | 96.0% | 77.0% | 0.0% |
-| OpenClaw ASR@1600 (↓) | 80.0% | 92.0% | 0.0% |
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="left" width="230">Metric</th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">DocVQA Utility&nbsp;(↑)</td>
+      <td align="right">96.0%</td>
+      <td align="right">95.8%</td>
+      <td align="right">95.2%</td>
+    </tr>
+    <tr>
+      <td align="left">Steal-PII ASR@1600&nbsp;(↓)</td>
+      <td align="right">100.0%</td>
+      <td align="right">100.0%</td>
+      <td align="right">0.0%</td>
+    </tr>
+    <tr>
+      <td align="left">Call-Tool ASR@1600&nbsp;(↓)</td>
+      <td align="right">96.0%</td>
+      <td align="right">77.0%</td>
+      <td align="right">0.0%</td>
+    </tr>
+    <tr>
+      <td align="left">OpenClaw ASR@1600&nbsp;(↓)</td>
+      <td align="right">80.0%</td>
+      <td align="right">92.0%</td>
+      <td align="right">0.0%</td>
+    </tr>
+  </tbody>
+</table>
 
 ## Utility Benchmarks on Benign Inputs
 
@@ -340,25 +542,115 @@ respectively. MMLU-Pro, GPQA Diamond, GSM8K, and Minerva Math use 5-, 0-, 8-,
 and 4-shot prompting. AgentDojo Utility uses 97 tasks; AgentDyn Utility uses
 60 tasks.
 
-| Metric | [meta-llama/Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) | [Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) |
-| --- | ---: | ---: | ---: |
-| MMLU-Pro (↑) | 46.5% | 46.7% | 46.3% |
-| GPQA Diamond (↑) | 23.7% | 24.2% | 24.2% |
-| GSM8K (↑) | 82.9% | 84.4% | 81.3% |
-| Minerva Math (↑) | 49.2% | 48.8% | 50.1% |
-| AlpacaEval2 (↑) | 23.7% | 24.0% | 23.7% |
-| SEP Utility (↑) | 55.4% | 55.9% | 59.4% |
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="left" width="230">Metric</th>
+      <th align="center" width="24%"><a href="https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct">meta-llama/<br>Llama-3.1-8B-<br>Instruct</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Llama-3.1-8B-<br>Instruct-MetaSecAlign</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO">Sizhe-Chen/<br>Llama-3.1-8B-<br>Instruct-SecPO</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">MMLU-Pro&nbsp;(↑)</td>
+      <td align="right">46.5%</td>
+      <td align="right">46.7%</td>
+      <td align="right">46.3%</td>
+    </tr>
+    <tr>
+      <td align="left">GPQA Diamond&nbsp;(↑)</td>
+      <td align="right">23.7%</td>
+      <td align="right">24.2%</td>
+      <td align="right">24.2%</td>
+    </tr>
+    <tr>
+      <td align="left">GSM8K&nbsp;(↑)</td>
+      <td align="right">82.9%</td>
+      <td align="right">84.4%</td>
+      <td align="right">81.3%</td>
+    </tr>
+    <tr>
+      <td align="left">Minerva Math&nbsp;(↑)</td>
+      <td align="right">49.2%</td>
+      <td align="right">48.8%</td>
+      <td align="right">50.1%</td>
+    </tr>
+    <tr>
+      <td align="left">AlpacaEval2&nbsp;(↑)</td>
+      <td align="right">23.7%</td>
+      <td align="right">24.0%</td>
+      <td align="right">23.7%</td>
+    </tr>
+    <tr>
+      <td align="left">SEP Utility&nbsp;(↑)</td>
+      <td align="right">55.4%</td>
+      <td align="right">55.9%</td>
+      <td align="right">59.4%</td>
+    </tr>
+  </tbody>
+</table>
 
-| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
-| --- | ---: | ---: | ---: |
-| MMLU-Pro (↑) | 84.8% | 83.9% | 84.6% |
-| GPQA Diamond (↑) | 81.3% | 79.3% | 80.8% |
-| GSM8K (↑) | 97.3% | 97.0% | 96.4% |
-| Minerva Math (↑) | 96.1% | 94.8% | 95.8% |
-| AlpacaEval2 (↑) | 80.6% | 81.6% | 82.9% |
-| SEP Utility (↑) | 93.0% | 93.9% | 94.3% |
-| AgentDojo Utility (↑) | 89.7% | 87.6% | 90.7% |
-| AgentDyn Utility (↑) | 71.7% | 76.7% | 71.7% |
+<table width="100%">
+  <thead>
+    <tr>
+      <th align="left" width="230">Metric</th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></th>
+      <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td align="left">MMLU-Pro&nbsp;(↑)</td>
+      <td align="right">84.8%</td>
+      <td align="right">83.9%</td>
+      <td align="right">84.6%</td>
+    </tr>
+    <tr>
+      <td align="left">GPQA Diamond&nbsp;(↑)</td>
+      <td align="right">81.3%</td>
+      <td align="right">79.3%</td>
+      <td align="right">80.8%</td>
+    </tr>
+    <tr>
+      <td align="left">GSM8K&nbsp;(↑)</td>
+      <td align="right">97.3%</td>
+      <td align="right">97.0%</td>
+      <td align="right">96.4%</td>
+    </tr>
+    <tr>
+      <td align="left">Minerva Math&nbsp;(↑)</td>
+      <td align="right">96.1%</td>
+      <td align="right">94.8%</td>
+      <td align="right">95.8%</td>
+    </tr>
+    <tr>
+      <td align="left">AlpacaEval2&nbsp;(↑)</td>
+      <td align="right">80.6%</td>
+      <td align="right">81.6%</td>
+      <td align="right">82.9%</td>
+    </tr>
+    <tr>
+      <td align="left">SEP Utility&nbsp;(↑)</td>
+      <td align="right">93.0%</td>
+      <td align="right">93.9%</td>
+      <td align="right">94.3%</td>
+    </tr>
+    <tr>
+      <td align="left">AgentDojo Utility&nbsp;(↑)</td>
+      <td align="right">89.7%</td>
+      <td align="right">87.6%</td>
+      <td align="right">90.7%</td>
+    </tr>
+    <tr>
+      <td align="left">AgentDyn Utility&nbsp;(↑)</td>
+      <td align="right">71.7%</td>
+      <td align="right">76.7%</td>
+      <td align="right">71.7%</td>
+    </tr>
+  </tbody>
+</table>
 
 Mean utility across the six instruction-following, science, and math
 benchmarks is **47.5% vs. 46.9%** for Llama SecPO vs. undefended, and
@@ -439,35 +731,35 @@ security-sensitive agentic settings for commercial purposes.
 Attack Success Rate (ASR ↓) under 8-bit quantization and speculative
 decoding (SD) on Qwen3.6-27B.
 
-<table>
+<table width="100%">
   <thead>
     <tr>
-      <th rowspan="2"></th>
-      <th colspan="2">Original BF16</th>
-      <th colspan="2">Q8_0</th>
-      <th colspan="2">Q8_0 + SD</th>
+      <th align="left" width="230" rowspan="2"></th>
+      <th align="center" width="24%" colspan="2">Original BF16</th>
+      <th align="center" width="24%" colspan="2">Q8_0</th>
+      <th align="center" width="24%" colspan="2">Q8_0 + SD</th>
     </tr>
     <tr>
-      <th><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Undef.</a></th>
-      <th><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Ours</a></th>
-      <th><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Undef.</a></th>
-      <th><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit">Ours</a></th>
-      <th><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Undef.</a></th>
-      <th><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit">Ours</a></th>
+      <th align="center" width="12%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Undef.</a></th>
+      <th align="center" width="12%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Ours</a></th>
+      <th align="center" width="12%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Undef.</a></th>
+      <th align="center" width="12%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit">Ours</a></th>
+      <th align="center" width="12%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Undef.</a></th>
+      <th align="center" width="12%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit">Ours</a></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <td>AgentDojo ASR</td>
-      <td><em>26.9%</em></td><td><strong>0.0%</strong></td>
-      <td><em>11.2%</em></td><td><strong>0.0%</strong></td>
-      <td><em>11.6%</em></td><td><strong>0.0%</strong></td>
+      <td align="left">AgentDojo ASR</td>
+      <td align="right"><em>26.9%</em></td><td align="right"><strong>0.0%</strong></td>
+      <td align="right"><em>11.2%</em></td><td align="right"><strong>0.0%</strong></td>
+      <td align="right"><em>11.6%</em></td><td align="right"><strong>0.0%</strong></td>
     </tr>
     <tr>
-      <td>AgentDyn ASR</td>
-      <td><em>22.0%</em></td><td><strong>0.0%</strong></td>
-      <td><em>15.5%</em></td><td><strong>0.0%</strong></td>
-      <td><em>15.5%</em></td><td><strong>0.0%</strong></td>
+      <td align="left">AgentDyn ASR</td>
+      <td align="right"><em>22.0%</em></td><td align="right"><strong>0.0%</strong></td>
+      <td align="right"><em>15.5%</em></td><td align="right"><strong>0.0%</strong></td>
+      <td align="right"><em>15.5%</em></td><td align="right"><strong>0.0%</strong></td>
     </tr>
   </tbody>
 </table>
