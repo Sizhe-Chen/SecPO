@@ -300,7 +300,7 @@ Gemini-2.5-Pro configuration.
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="400" rowspan="2">Target</th>
+      <th align="left" width="600" rowspan="2">Target</th>
       <th align="center" width="16%" rowspan="2">AgentDojo<br>ASR&nbsp;(↓)</th>
       <th align="center" colspan="2">Victim queries</th>
       <th align="center" colspan="2">Cost ($)</th>
@@ -734,7 +734,7 @@ decoding (SD) on Qwen3.6-27B.
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="400" rowspan="2"></th>
+      <th align="left" width="600" rowspan="2"></th>
       <th align="center" width="24%" colspan="2">Original BF16</th>
       <th align="center" width="24%" colspan="2">Q8_0</th>
       <th align="center" width="24%" colspan="2">Q8_0 + SD</th>
