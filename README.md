@@ -161,6 +161,19 @@ present.
 | DTaP ASR (↓) | 50.8% | 45.9% | 7.6% |
 | DTaP Utility under attack (↑) | 65.8% | 70.0% | 74.5% |
 
+## Security against adaptive visual prompt injections
+
+Repeat-After-Me iteratively optimizes instructions written on top of an image.
+The corresponding DocVQA images without injections measure utility.
+The code for these evaluations is not included in this repository.
+
+| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
+| --- | ---: | ---: | ---: |
+| DocVQA Utility (↑) | 96.0% | 95.8% | 95.2% |
+| Steal-PII ASR@1600 (↓) | 100.0% | 100.0% | 0.0% |
+| Call-Tool ASR@1600 (↓) | 96.0% | 77.0% | 0.0% |
+| OpenClaw ASR@1600 (↓) | 80.0% | 92.0% | 0.0% |
+
 ## Utility Benchmarks on Benign Inputs
 
 - **MMLU-Pro, GPQA Diamond, GSM8K, and Minerva Math:** use
@@ -204,19 +217,6 @@ Mean utility across the six instruction-following, science, and math
 benchmarks is **47.5% vs. 46.9%** for Llama SecPO vs. undefended, and
 **89.1% vs. 88.9%** for Qwen. See [Performance](docs/PERFORMANCE.md) for the
 combined results and evaluation settings.
-
-## Security against adaptive visual prompt injections
-
-Repeat-After-Me iteratively optimizes instructions written on top of an image.
-The corresponding DocVQA images without injections measure utility.
-The code for these evaluations is not included in this repository.
-
-| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
-| --- | ---: | ---: | ---: |
-| DocVQA Utility (↑) | 96.0% | 95.8% | 95.2% |
-| Steal-PII ASR@1600 (↓) | 100.0% | 100.0% | 0.0% |
-| Call-Tool ASR@1600 (↓) | 96.0% | 77.0% | 0.0% |
-| OpenClaw ASR@1600 (↓) | 80.0% | 92.0% | 0.0% |
 
 # Defensive Fine-Tuning (SecPO)
 
