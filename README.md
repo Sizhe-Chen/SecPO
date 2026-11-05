@@ -50,10 +50,7 @@ After completing the environment setup, run:
 python demo.py
 ```
 
-The [AgentDojo example](examples/agentdojo_tool_attack.json) replays an adaptive
-calendar-result injection that requests `delete_file(file_id="13")` after
-answering a dinner-location question. Tool calls are printed without execution.
-This selected example is a single-response demonstration, not a full benchmark run.
+## Text Input Injection
 
 SecPO requires trusted instructions in `system` or `user` and untrusted text, tool returns, or images in `input`. The script loads one model at a time with `AutoModelForImageTextToText` and prints each generated response. The demo formats its request as follows:
 
@@ -76,6 +73,8 @@ inputs = tokenizer.apply_chat_template(
     return_tensors="pt",
 )
 ```
+
+## Completion Attacks with Special Delimiters
 
 Multiple messages are formatted into one string that is fed to the LLM by a library function, which is responsible for applying the chat template, delimiters, and tokenizer to obtain the final input to the LLM. A well-written library, e.g., OpenAI Harmony, will ensure that no message can break out of its message type or change its role. Thus, we assume that malicious text in the untrusted data cannot escape the ``input`` message role to become an officially recognized trusted prompt. Our released `chat_template.jinja` implements a basic [recursive filtering of special delimiters](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO/blob/main/chat_template.jinja#L48) proposed in the [StruQ paper](https://arxiv.org/html/2402.06363v2#S4.SS3.p4), so using our HuggingFace repo will directly prevent an attacker's attempt from escaping ``input`` message role.
 
@@ -117,7 +116,11 @@ The rendered result keeps the attacker's `assistant`, `user`, and
 `SYSTEM UPDATE` strings as ordinary text inside the original `input`
 message.
 
-The [AgentDojo example](examples/agentdojo_tool_attack.json) puts an attacked calendar result in `input`:
+## AgentDojo: Injection in Tool Returns
+
+In a common agentic setup, tool returns are untrusted data. We test this setting
+with an [AgentDojo example](examples/agentdojo_tool_attack.json) that places a
+calendar result containing a prompt injection in `input`:
 
 ```text
 user: Where is the 'Dinner with Blue Sparrow Tech' on May 24th going to be?
