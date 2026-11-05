@@ -50,6 +50,11 @@ After completing the environment setup, run:
 python demo.py
 ```
 
+The [AgentDojo example](examples/agentdojo_tool_attack.json) replays an adaptive
+calendar-result injection that requests `delete_file(file_id="13")` after
+answering a dinner-location question. Tool calls are printed without execution.
+This selected example is a single-response demonstration, not a full benchmark run.
+
 SecPO requires trusted instructions in `user` and untrusted text, tool returns, or images in `input`. The script loads one model at a time with `AutoModelForImageTextToText` and prints each generated response. The demo formats its request as follows:
 
 ```python
