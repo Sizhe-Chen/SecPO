@@ -1,8 +1,6 @@
 # SecPO: Principled Adversarial Training for Prompt Injection Security
 
-[[Paper]](https://arxiv.org/pdf/2610.41998)
-
-[Sizhe Chen](https://sizhe-chen.github.io), [Yibo Peng](https://pppyb.github.io/), [Jaewon Chang](https://www.jaewon.io/), [Chawin Sitawarin](https://chawin.sitawarin.com/), [David Wagner](https://people.eecs.berkeley.edu/~daw)
+[[Paper]](https://arxiv.org/pdf/2610.41998) [Sizhe Chen](https://sizhe-chen.github.io), [Yibo Peng](https://pppyb.github.io/), [Jaewon Chang](https://www.jaewon.io/), [Chawin Sitawarin](https://chawin.sitawarin.com/), [David Wagner](https://people.eecs.berkeley.edu/~daw)
 
 Recognized as a top threat to AI agents, prompt injection allows instructions from untrusted data (email, documents, websites) to manipulate the agent’s operation. The existing best-defended LLM, Meta-SecAlign, is trained with the DPO loss but still suffers from attack success rates (ASRs) approaching 100% under adaptive prompt injections. One reason is that DPO anchors the model around the undefended reference model, which is insecure. We show an idealized reference model—an injection-invariant, utility-preserving oracle—can nevertheless be approximated, as its output distribution in training is interestingly accessible. This new observation motivates a theoretically principled SecPO loss. Another Meta-SecAlign shortcoming is that it trains on weak simulated attacks. We implement an efficient adversarial training (AT) pipeline that synthesizes strong injected inputs (best@240), and train the model on them. Our AT reduces ASRs by 1.5–14.5× across three SoTA adaptive attacks, compared with Meta-SecAlign; the SecPO loss reduces them by a further 2.4–4.6× compared with using DPO loss. In agentic workflows, our SecPO + AT Qwen3.6-27B is much more secure than Meta-SecAlign: 8.8% vs. 78.8% AgentDojo ASR@800 under the AttackerMovesSecond attack. Moreover, our defended model shows no noticeable reduction in benign utility in nine benchmarks covering agentic tool calling, instruction following, science, and math.
 
@@ -283,7 +281,7 @@ For Llama-3.1-8B online training, prepare Llama-specific labels, start the
 [`train_llama31_8b_online.sh`](scripts/train_llama31_8b_online.sh). See
 [Training](docs/TRAINING.md) for the objective, data commands, and model merge.
 
-# Optimized Training Data
+# Free Security Lunch: Use Our Trainset with Optimized Injections
 
 Our optimized training sets reuse strong injections generated during online
 adversarial training of Llama-3.1-8B-Instruct, so other models can be trained
@@ -291,7 +289,7 @@ without running attack generation again. Offline SecPO training transfers
 these security gains to Qwen3.6-27B while preserving utility.
 
 The data also improve SecOPD on-policy distillation: replacing its unoptimized
-injections with ours reduces Qwen3.6-27B SEP and DTaP ASRs by **2.5–22.5×**,
+injections with ours reduces Qwen3.6-27B ASRs by **2.5–22.5×**,
 with no noticeable overall utility cost. In that comparison, the datasets
 differ only in their simulated injections.
 
@@ -301,9 +299,74 @@ differ only in their simulated injections.
 | Qwen3.6-27B SecPO | [Qwen3.6-27B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-trainset) |
 | Qwen3.8-27B SecPO | [Qwen3.8-27B-Instruct-SecPO-trainset](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.8-27B-Instruct-SecPO-trainset) |
 
-The listed datasets are public. When adapting the preference data to a new model,
-[generate that model's own response labels](docs/TRAINING.md#generate-model-specific-response-labels)
-and render the training prompts with its tokenizer and chat template.
+The listed datasets are public. **Reuse our optimized injections to train
+your own model without paying for another round of attack optimization.**
+The remaining work is to generate that model's response labels and run
+defensive fine-tuning. For a new base model, follow these steps:
+
+1. **Reuse the tasks and optimized injections.** Download a raw trainset
+   above and keep each example's trusted task, clean input, optimized
+   injection (`rejected_input_whole`), and insertion position
+   (`inject_at_the_end`). The model name in a dataset identifies its existing
+   response labels and prompt format; its optimized injection text can be
+   reused when adapting the data to another model.
+
+2. **Render the prompts for your model.** Use its tokenizer and a chat
+   template that separates trusted instructions in `user` from untrusted
+   content in `input`, retaining the model's native special tokens. Construct
+   the attacked `prompt` and its matching injection-free `clean_prompt`;
+   they must differ only by removal of the injected text. Save these in a
+   new raw JSON/JSONL file together with `chosen_input` and `rejected_input`.
+   The response-label generator expects this rendering to be complete.
+
+3. **Generate both response labels with the exact base model you will
+   fine-tune.** Present `chosen_input` (the complete trusted instruction and
+   clean input) to produce `chosen`. Independently present `rejected_input`
+   (the attacker target request) as an ordinary user request to produce
+   `rejected`. Keep a separate labeled dataset for each base model. The
+   [response-label generator](scripts/generate_response_labels.py) performs
+   these two requests with the model's native chat template and thinking
+   disabled; it replaces the response fields while preserving the optimized
+   injections and rendered prompts.
+
+4. **Prepare the preference pairs.** After rendering your model's raw file,
+   run the commands below, replacing the model ID and revision with your
+   target checkpoint. The preparation step validates the attacked/clean
+   prompt pairs and writes the format consumed by the trainer.
+
+```bash
+python scripts/generate_response_labels.py \
+  --model YOUR_ORG/YOUR_BASE_MODEL \
+  --revision YOUR_MODEL_COMMIT_SHA \
+  --input outputs/data/your_model_raw_preferences.jsonl \
+  --output outputs/data/your_model_labels.jsonl
+
+python scripts/prepare_preferences.py \
+  --input outputs/data/your_model_labels.jsonl \
+  --output outputs/data/your_model_preferences.jsonl.gz
+```
+
+5. **Fine-tune on the prepared data.** Copy
+   [the offline training configuration](configs/train_qwen36_27b_offline.json)
+   to `configs/train_your_model_offline.json`. Set `model_name_or_path`, the
+   matching 40-character `model_revision`, the prepared `data_file`, and a
+   new `output_dir`. Adapt `lora_target_modules`, token/EOS handling, sequence
+   lengths, precision, and batch settings to your model, and use an
+   Accelerate configuration appropriate for your hardware. The trainer
+   supports compatible decoder-only models through `AutoModelForCausalLM`
+   and PEFT LoRA; other architectures need the corresponding loader and
+   training integration. SecPO scores the trainable policy on attacked
+   prompts and the frozen reference on their matching clean prompts.
+
+```bash
+accelerate launch --module secpo.training_cli \
+  --config configs/train_your_model_offline.json
+```
+
+See the [model-specific label-generation workflow](docs/TRAINING.md#generate-model-specific-response-labels)
+and [training guide](docs/TRAINING.md) for generation options, the preference
+schema, and checkpoint export. Evaluate the trained model's security and
+benign utility using the same input-role separation at inference time.
 
 # Quantized Models and Speculative Decoding
 
