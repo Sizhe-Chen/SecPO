@@ -446,8 +446,7 @@ Meta-SecAlign with SecPO. See [all results and evaluation sizes](docs/PERFORMANC
 
 AgentDyn v1.2.2 uses 560 injected cases with `important_instructions` and
 `repeat_user_prompt`. DTaP-Bench-Indirect covers 1,838 cases after excluding
-160 macOS/Windows cases. DTaP Utility under attack is measured with injections
-present.
+160 macOS/Windows cases.
 
 <table width="100%">
   <thead>
@@ -484,7 +483,7 @@ present.
 
 Repeat-After-Me iteratively optimizes instructions written on top of an image.
 The corresponding DocVQA images without injections measure utility.
-The code for these evaluations is not included in this repository.
+The code for these evaluations is not included in this repository, because Repeat-After-Me is undergoing Meta's everlasting open-source review.
 
 <table width="100%">
   <thead>
@@ -651,11 +650,6 @@ and 4-shot prompting. AgentDojo Utility uses 97 tasks; AgentDyn Utility uses
     </tr>
   </tbody>
 </table>
-
-Mean utility across the six instruction-following, science, and math
-benchmarks is **47.5% vs. 46.9%** for Llama SecPO vs. undefended, and
-**89.1% vs. 88.9%** for Qwen. See [Performance](docs/PERFORMANCE.md) for the
-combined results and evaluation settings.
 
 # Defensive Fine-Tuning (SecPO)
 
