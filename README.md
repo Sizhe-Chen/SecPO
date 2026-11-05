@@ -380,12 +380,12 @@ counts as successful if any template succeeds. Each adaptive evaluation uses
 
 - **AgentDyn:** evaluate static prompt injections in dynamic agent
   environments using the [AgentDyn setup and evaluation guide](docs/AGENTDYN.md).
-- **DTaP-Bench-Indirect:** evaluate 1,838 indirect-injection scenarios using
+- **DTaP:** evaluate 1,838 indirect-injection scenarios using
   the [DTaP setup and evaluation guide](docs/DTAP.md). DTaP also reports
   **utility under attack**.
 
 AgentDyn v1.2.2 uses 560 injected cases with `important_instructions` and
-`repeat_user_prompt`. DTaP-Bench-Indirect covers 1,838 cases after excluding
+`repeat_user_prompt`. DTaP covers 1,838 cases after excluding
 160 macOS/Windows cases.
 
 <table width="100%">
@@ -422,6 +422,7 @@ AgentDyn v1.2.2 uses 560 injected cases with `important_instructions` and
 ## Security against adaptive visual prompt injections
 
 Repeat-After-Me iteratively optimizes instructions written on top of an image.
+Each Repeat-After-Me setup contains 100 samples.
 The corresponding DocVQA images without injections measure utility.
 The code for these evaluations is not included in this repository, because Repeat-After-Me is undergoing Meta's open-source review.
 
