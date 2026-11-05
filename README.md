@@ -116,7 +116,7 @@ The rendered result keeps the attacker's `assistant`, `user`, and
 `SYSTEM UPDATE` strings as ordinary text inside the original `input`
 message.
 
-## Strong injection in agentic tool-calling
+## Example 3: Strong injection in agentic tool-calling
 
 In a common agentic setup, tool returns are untrusted data. We test this setting
 with an [AgentDojo example](examples/agentdojo_tool_attack.json) that places a
