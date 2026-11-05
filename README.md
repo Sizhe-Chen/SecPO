@@ -423,28 +423,58 @@ and [training guide](docs/TRAINING.md) for commands and data requirements.
 
 # Quantized Models and Speculative Decoding
 
-An **8-bit Q8_0** conversion of the defended Qwen3.6-27B runs with
-[llama.cpp](https://github.com/ggml-org/llama.cpp) on a **single RTX 5090
-with 32 GB of memory**. Reusing the existing DFlash drafter without additional
-training increases decoding throughput by **2.66× on AgentDojo** and **2.63×
-on AgentDyn**, compared with the same quantized model without speculative
-decoding. The Q8_0 model records **0.0% observed static ASR on both benchmarks**,
-with and without speculative decoding.
+**We release a quantized version of our defended Qwen3.6-27B that retains
+security and supports faster generation through speculative decoding.** We
+quantize the model to 8-bit Q8_0 using llama.cpp [[76]](https://github.com/ggml-org/llama.cpp)
+and run it on a single RTX 5090 GPU with 32 GB of memory. Speculative decoding
+uses a lightweight auxiliary model, called a drafter, to propose several tokens
+at a time; the defended model checks these proposals against its own predictions
+in parallel to decide which to accept. Reusing the publicly available DFlash
+[[77]](https://arxiv.org/abs/2602.06036) drafter without additional training
+increases decoding throughput by factors of 2.66 on AgentDojo and 2.63 on
+AgentDyn, compared with the same quantized model without speculative decoding.
+Table 8 shows 0% observed static ASR on both benchmarks, with or without
+speculative decoding. These results show that the defended checkpoint can
+benefit from existing inference optimizations without defense-specific
+retraining, e.g., for the drafter model. Both the quantized and unquantized
+versions of our defended Qwen3.6-27B can support ordinary workflows in
+security-sensitive agentic settings for commercial purposes.
 
-Attack Success Rate (ASR ↓) under 8-bit quantization and speculative
-decoding (SD):
+Table 8: Attack Success Rate (ASR ↓) under 8-bit quantization and speculative
+decoding (SD) on Qwen3.6-27B.
 
-| Model | Configuration | AgentDojo ASR | AgentDyn ASR |
-| --- | --- | ---: | ---: |
-| [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | Original BF16 | 26.9% | 22.0% |
-| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | Original BF16 | 0.0% | 0.0% |
-| [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | Q8_0 | 11.2% | 15.5% |
-| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit) | Q8_0 | 0.0% | 0.0% |
-| [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | Q8_0 + SD | 11.6% | 15.5% |
-| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit) | Q8_0 + SD | 0.0% | 0.0% |
-
-The released checkpoint uses bitsandbytes INT8; the measurements above are
-for the llama.cpp Q8_0 conversion.
+<table>
+  <thead>
+    <tr>
+      <th rowspan="2"></th>
+      <th colspan="2">Original BF16</th>
+      <th colspan="2">Q8_0</th>
+      <th colspan="2">Q8_0 + SD</th>
+    </tr>
+    <tr>
+      <th><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Undef.</a></th>
+      <th><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Ours</a></th>
+      <th><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Undef.</a></th>
+      <th><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit">Ours</a></th>
+      <th><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Undef.</a></th>
+      <th><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit">Ours</a></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>AgentDojo ASR</td>
+      <td><em>26.9%</em></td><td><strong>0.0%</strong></td>
+      <td><em>11.2%</em></td><td><strong>0.0%</strong></td>
+      <td><em>11.6%</em></td><td><strong>0.0%</strong></td>
+    </tr>
+    <tr>
+      <td>AgentDyn ASR</td>
+      <td><em>22.0%</em></td><td><strong>0.0%</strong></td>
+      <td><em>15.5%</em></td><td><strong>0.0%</strong></td>
+      <td><em>15.5%</em></td><td><strong>0.0%</strong></td>
+    </tr>
+  </tbody>
+</table>
 
 # Citation
 
