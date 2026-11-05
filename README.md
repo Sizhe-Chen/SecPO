@@ -421,14 +421,12 @@ and [training guide](docs/TRAINING.md) for commands and data requirements.
 
 # Quantized Models and Speculative Decoding
 
-**We release a quantized version of our defended Qwen3.6-27B that retains
-security and supports faster generation through speculative decoding.** We
-quantize the model to 8-bit Q8_0 using llama.cpp [[76]](https://github.com/ggml-org/llama.cpp)
-and run it on a single RTX 5090 GPU with 32 GB of memory. Speculative decoding
+We release a quantized version of our defended Qwen3.6-27B that retains
+security and supports faster generation through speculative decoding. We
+quantize the model to 8-bit Q8_0 using llama.cpp and run it on a single RTX 5090 GPU with 32 GB of memory. Speculative decoding
 uses a lightweight auxiliary model, called a drafter, to propose several tokens
 at a time; the defended model checks these proposals against its own predictions
-in parallel to decide which to accept. Reusing the publicly available DFlash
-[[77]](https://arxiv.org/abs/2602.06036) drafter without additional training
+in parallel to decide which to accept. Reusing the publicly available DFlash drafter without additional training
 increases decoding throughput by factors of 2.66 on AgentDojo and 2.63 on
 AgentDyn, compared with the same quantized model without speculative decoding.
 Table 8 shows 0% observed static ASR on both benchmarks, with or without
@@ -438,7 +436,7 @@ retraining, e.g., for the drafter model. Both the quantized and unquantized
 versions of our defended Qwen3.6-27B can support ordinary workflows in
 security-sensitive agentic settings for commercial purposes.
 
-Table 8: Attack Success Rate (ASR ↓) under 8-bit quantization and speculative
+Attack Success Rate (ASR ↓) under 8-bit quantization and speculative
 decoding (SD) on Qwen3.6-27B.
 
 <table>
