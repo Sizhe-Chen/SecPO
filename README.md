@@ -9,7 +9,7 @@ Links to our open model checkpoints.
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="329">Base model</th>
+      <th align="left" width="600">Base model</th>
       <th align="center" width="20%">Meta-SecAlign</th>
       <th align="center" width="20%">SecPO</th>
       <th align="center" width="20%">SecOPD</th>
@@ -262,7 +262,7 @@ and 80 task pairs for adaptive attacks. The static attack is
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="230">Metric</th>
+      <th align="left" width="400">Metric</th>
       <th align="center" width="24%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></th>
@@ -300,7 +300,7 @@ Gemini-2.5-Pro configuration.
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="230" rowspan="2">Target</th>
+      <th align="left" width="400" rowspan="2">Target</th>
       <th align="center" width="16%" rowspan="2">AgentDojo<br>ASR&nbsp;(↓)</th>
       <th align="center" colspan="2">Victim queries</th>
       <th align="center" colspan="2">Cost ($)</th>
@@ -361,7 +361,7 @@ counts as successful if any template succeeds. Each adaptive evaluation uses
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="230">Metric</th>
+      <th align="left" width="400">Metric</th>
       <th align="center" width="24%"><a href="https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct">meta-llama/<br>Llama-3.1-8B-<br>Instruct</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Llama-3.1-8B-<br>Instruct-MetaSecAlign</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO">Sizhe-Chen/<br>Llama-3.1-8B-<br>Instruct-SecPO</a></th>
@@ -398,7 +398,7 @@ counts as successful if any template succeeds. Each adaptive evaluation uses
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="230">Metric</th>
+      <th align="left" width="400">Metric</th>
       <th align="center" width="24%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></th>
@@ -452,7 +452,7 @@ present.
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="230">Metric</th>
+      <th align="left" width="400">Metric</th>
       <th align="center" width="24%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></th>
@@ -489,7 +489,7 @@ The code for these evaluations is not included in this repository.
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="230">Metric</th>
+      <th align="left" width="400">Metric</th>
       <th align="center" width="24%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></th>
@@ -545,7 +545,7 @@ and 4-shot prompting. AgentDojo Utility uses 97 tasks; AgentDyn Utility uses
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="230">Metric</th>
+      <th align="left" width="400">Metric</th>
       <th align="center" width="24%"><a href="https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct">meta-llama/<br>Llama-3.1-8B-<br>Instruct</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Llama-3.1-8B-<br>Instruct-MetaSecAlign</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO">Sizhe-Chen/<br>Llama-3.1-8B-<br>Instruct-SecPO</a></th>
@@ -594,7 +594,7 @@ and 4-shot prompting. AgentDojo Utility uses 97 tasks; AgentDyn Utility uses
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="230">Metric</th>
+      <th align="left" width="400">Metric</th>
       <th align="center" width="24%"><a href="https://huggingface.co/Qwen/Qwen3.6-27B">Qwen/<br>Qwen3.6-27B</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-MetaSecAlign</a></th>
       <th align="center" width="24%"><a href="https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO">Sizhe-Chen/<br>Qwen3.6-27B-<br>Instruct-SecPO</a></th>
@@ -734,7 +734,7 @@ decoding (SD) on Qwen3.6-27B.
 <table width="100%">
   <thead>
     <tr>
-      <th align="left" width="230" rowspan="2"></th>
+      <th align="left" width="400" rowspan="2"></th>
       <th align="center" width="24%" colspan="2">Original BF16</th>
       <th align="center" width="24%" colspan="2">Q8_0</th>
       <th align="center" width="24%" colspan="2">Q8_0 + SD</th>
