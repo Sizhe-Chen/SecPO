@@ -399,9 +399,7 @@ all use **injections optimized through adversarial training against
 Llama-3.1-8B-Instruct**, with model-specific response labels and prompt formats.
 Reuse these injections to train other models without rerunning attack
 optimization. In Qwen3.6-27B SecOPD, replacing unoptimized injections with ours
-reduces ASRs by **2.5–22.5×** with no noticeable overall utility cost.
-
-To train another model with SecPO:
+reduces ASRs by **2.5–22.5×** with no noticeable overall utility cost. To train another model with SecPO:
 
 1. **Reuse the tasks and injections.** Preserve each trusted task, clean
    input, injection, and insertion position. Render the attacked `prompt`
