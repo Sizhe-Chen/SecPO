@@ -56,6 +56,12 @@ Use `python demo.py --show-prompt` to inspect the example without loading models
 
 # Evaluation
 
+Higher utility (↑) and lower attack success rate (ASR ↓) are better.
+Meta-SecAlign uses DPO loss without AT; SecPO uses online AT for
+`meta-llama/Llama-3.1-8B-Instruct` and offline AT for `Qwen/Qwen3.6-27B`.
+The main Qwen3.6-27B evaluations use thinking disabled. Model columns give
+the full checkpoint IDs.
+
 ## AgentDojo Genetic Attack
 
 Our released [AttackerMovesSecond implementation](src/secpo/attacks/agentdojo_exact_first.py)
@@ -76,14 +82,32 @@ python scripts/evaluate_agentdojo_qwen36_27b.py \
   --output-dir results/agentdojo_search --resume
 ```
 
-The main comparison below uses the original **Gemini-2.5-Pro** attack
-configuration, separately from the cheaper configuration above. Thinking is
-disabled for all three Qwen3.6-27B models.
+The Genetic Adpt. ASR@800 results below use the original **Gemini-2.5-Pro**
+attack configuration, separately from the cheaper configuration above.
+AgentDojo v1.2.1 uses 97 tasks for utility, 949 task pairs for static attacks,
+and 80 task pairs for adaptive attacks. The static attack is
+`important_instructions`; the defense is `repeat_user_prompt`.
 
-| AgentDojo | Undefended | Meta-SecAlign | SecPO |
+| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
 | --- | ---: | ---: | ---: |
-| Genetic adaptive ASR@800 ↓ | 81.3% | 78.8% | **8.8%** |
-| Benign utility ↑ | 89.7% | 87.6% | **90.7%** |
+| AgentDojo Utility (↑) | 89.7% | 87.6% | 90.7% |
+| AgentDojo ASR (↓) | 26.9% | 2.2% | 0.0% |
+| Genetic Adpt. ASR@800 (↓) | 81.3% | 78.8% | 8.8% |
+
+<details>
+<summary>Victim queries and Cost ($) of successful AgentDojo Genetic attacks</summary>
+
+Query and cost statistics report means and medians conditioned on successful
+attacks under the 80-example, Pass@800 protocol. These costs use the original
+Gemini-2.5-Pro configuration.
+
+| Target | ASR (↓) | Victim queries<br>Mean | Victim queries<br>Median | Cost ($)<br>Mean | Cost ($)<br>Median |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | 81.3% | 26 | 13 | 0.88 | 0.43 |
+| [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | 78.8% | 109 | 53 | 5.92 | 2.56 |
+| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | 8.8% | 227 | 96 | 34.90 | 13.20 |
+
+</details>
 
 See the [configuration](configs/evaluate_agentdojo_search_qwen36_secpo.json)
 and [AgentDojo guide](docs/AGENTDOJO.md) for the original search interface,
@@ -97,7 +121,25 @@ attacks and model-specific completion attacks.
 PAIR, and TAP with supplied attacker, victim, and judge backends. Start with
 the [commands and judging protocol](docs/EVALUATION.md#running-sep-and-utility-evaluations).
 
-Across Genetic ASR@800, TAP ASR@800, and PISmith ASR@10, mean SEP ASR falls
+SEP ASR uses 9,160 examples and six static attack templates; an example
+counts as successful if any template succeeds. Each adaptive evaluation uses
+1,024 examples, with 800 attempts for Genetic and TAP and 10 for PISmith.
+
+| Metric | [meta-llama/Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) | [Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) |
+| --- | ---: | ---: | ---: |
+| SEP ASR (↓) | 98.1% | 1.8% | 1.4% |
+| Genetic Adpt. ASR@800 (↓) | 100.0% | 89.1% | 12.3% |
+| TAP Adpt. ASR@800 (↓) | 100.0% | 84.6% | 12.2% |
+| PISmith Adpt. ASR@10 (↓) | 98.7% | 95.1% | 7.0% |
+
+| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
+| --- | ---: | ---: | ---: |
+| SEP ASR (↓) | 98.9% | 2.9% | 1.8% |
+| Genetic Adpt. ASR@800 (↓) | 100.0% | 93.7% | 13.3% |
+| TAP Adpt. ASR@800 (↓) | 100.0% | 90.1% | 12.5% |
+| PISmith Adpt. ASR@10 (↓) | 98.1% | 94.0% | 1.8% |
+
+Across Genetic Adpt. ASR@800, TAP Adpt. ASR@800, and PISmith Adpt. ASR@10, mean SEP ASR falls
 from **89.6% to 10.5%** for Llama and **92.6% to 9.2%** for Qwen, comparing
 Meta-SecAlign with SecPO. See [all results and evaluation sizes](docs/PERFORMANCE.md).
 
@@ -109,27 +151,93 @@ Meta-SecAlign with SecPO. See [all results and evaluation sizes](docs/PERFORMANC
   the [DTaP setup and evaluation guide](docs/DTAP.md). DTaP also reports
   **utility under attack**.
 
-For Qwen3.6-27B with thinking disabled, static ASR falls from **4.8% to 0.0%**
-on AgentDyn and **45.9% to 7.6%** on DTaP, comparing Meta-SecAlign with SecPO.
-See [Performance](docs/PERFORMANCE.md) for the complete comparisons.
+AgentDyn v1.2.2 uses 560 injected cases with `important_instructions` and
+`repeat_user_prompt`. DTaP-Bench-Indirect covers 1,838 cases after excluding
+160 macOS/Windows cases. DTaP Utility under attack is measured with injections
+present.
+
+| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
+| --- | ---: | ---: | ---: |
+| AgentDyn ASR (↓) | 22.0% | 4.8% | 0.0% |
+| DTaP ASR (↓) | 50.8% | 45.9% | 7.6% |
+| DTaP Utility under attack (↑) | 65.8% | 70.0% | 74.5% |
+
+The DTaP subset results below report ASR (↓). The Semantically close subset
+contains 481 cases, and the Multiple injections subset contains 123 cases.
+
+| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
+| --- | ---: | ---: | ---: |
+| Semantically close subset | 58.8% | 55.1% | 12.3% |
+| Multiple injections subset | 51.2% | 33.3% | 3.3% |
 
 ## Utility Benchmarks on Benign Inputs
 
-- **MMLU-Pro, GPQA Diamond, GSM8K, and Minerva MATH:** use
+- **MMLU-Pro, GPQA Diamond, GSM8K, and Minerva Math:** use
   [`evaluate_lm_eval_utility.py`](scripts/evaluate_lm_eval_utility.py) with the
   [Llama](configs/evaluate_lm_eval_llama31_8b.json) or
   [Qwen](configs/evaluate_lm_eval_qwen36_27b.json) configuration.
-- **AlpacaEval2 and SEP utility:** generate each evaluated model's outputs,
+- **AlpacaEval2 and SEP Utility:** generate each evaluated model's outputs,
   then use [`evaluate_reference_utility.py`](scripts/evaluate_reference_utility.py)
   with the fixed comparator outputs. Both report **raw win rate**; see the
   [reference evaluation guide](docs/REFERENCE_UTILITY.md).
-- **AgentDojo and AgentDyn utility:** run the benign task evaluations
+- **AgentDojo Utility and AgentDyn Utility:** run the benign task evaluations
   described in the [AgentDojo](docs/AGENTDOJO.md) and
   [AgentDyn](docs/AGENTDYN.md) guides.
 
+AlpacaEval2 and SEP Utility use raw win rates on 805 and 9,160 examples,
+respectively. MMLU-Pro, GPQA Diamond, GSM8K, and Minerva Math use 5-, 0-, 8-,
+and 4-shot prompting. AgentDojo Utility uses 97 tasks; AgentDyn Utility uses
+60 tasks.
+
+| Metric | [meta-llama/Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) | [Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) |
+| --- | ---: | ---: | ---: |
+| MMLU-Pro (↑) | 46.5% | 46.7% | 46.3% |
+| GPQA Diamond (↑) | 23.7% | 24.2% | 24.2% |
+| GSM8K (↑) | 82.9% | 84.4% | 81.3% |
+| Minerva Math (↑) | 49.2% | 48.8% | 50.1% |
+| AlpacaEval2 (↑) | 23.7% | 24.0% | 23.7% |
+| SEP Utility (↑) | 55.4% | 55.9% | 59.4% |
+
+| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
+| --- | ---: | ---: | ---: |
+| MMLU-Pro (↑) | 84.8% | 83.9% | 84.6% |
+| GPQA Diamond (↑) | 81.3% | 79.3% | 80.8% |
+| GSM8K (↑) | 97.3% | 97.0% | 96.4% |
+| Minerva Math (↑) | 96.1% | 94.8% | 95.8% |
+| AlpacaEval2 (↑) | 80.6% | 81.6% | 82.9% |
+| SEP Utility (↑) | 93.0% | 93.9% | 94.3% |
+| AgentDojo Utility (↑) | 89.7% | 87.6% | 90.7% |
+| AgentDyn Utility (↑) | 71.7% | 76.7% | 71.7% |
+
 Mean utility across the six instruction-following, science, and math
 benchmarks is **47.5% vs. 46.9%** for Llama SecPO vs. undefended, and
-**89.1% vs. 88.9%** for Qwen. Full tables are in [Performance](docs/PERFORMANCE.md).
+**89.1% vs. 88.9%** for Qwen. See [Performance](docs/PERFORMANCE.md) for the
+combined results and evaluation settings.
+
+## Security generalization to multimodal tasks
+
+Repeat-After-Me iteratively optimizes instructions written on top of an image.
+The corresponding DocVQA images without injections measure utility.
+
+| Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
+| --- | ---: | ---: | ---: |
+| DocVQA Utility (↑) | 96.0% | 95.8% | 95.2% |
+| Steal-PII ASR@1600 (↓) | 100.0% | 100.0% | 0.0% |
+| Call-Tool ASR@1600 (↓) | 96.0% | 77.0% | 0.0% |
+| OpenClaw ASR@1600 (↓) | 80.0% | 92.0% | 0.0% |
+
+## Robustness to white-box attacks
+
+White-box attack success rates (ASR ↓) require access beyond the black-box
+threat model: Basic Adaptive uses model embedding weights, and GCG uses
+complete weights. The columns below compare the undefended checkpoint,
+Meta-SecAlign with static simulated attacks, and SecPO with adaptive simulated
+attacks.
+
+| Metric | [meta-llama/Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) | [Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) |
+| --- | ---: | ---: | ---: |
+| Basic Adaptive | 97.1% | 33.0% | 10.6% |
+| GCG | 87.0% | 20.7% | 5.8% |
 
 # Defensive Fine-Tuning (SecPO)
 
@@ -187,6 +295,18 @@ training increases decoding throughput by **2.66× on AgentDojo** and **2.63×
 on AgentDyn**, compared with the same quantized model without speculative
 decoding. The Q8_0 model records **0.0% observed static ASR on both benchmarks**,
 with and without speculative decoding.
+
+Attack Success Rate (ASR ↓) under 8-bit quantization and speculative
+decoding (SD):
+
+| Model | Configuration | AgentDojo ASR | AgentDyn ASR |
+| --- | --- | ---: | ---: |
+| [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | Original BF16 | 26.9% | 22.0% |
+| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | Original BF16 | 0.0% | 0.0% |
+| [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | Q8_0 | 11.2% | 15.5% |
+| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | Q8_0 | 0.0% | 0.0% |
+| [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | Q8_0 + SD | 11.6% | 15.5% |
+| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | Q8_0 + SD | 0.0% | 0.0% |
 
 The separately released
 [bitsandbytes INT8 checkpoint](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit)
