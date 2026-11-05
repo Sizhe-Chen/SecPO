@@ -42,9 +42,7 @@ python setup.py
 
 [`demo.py`](demo.py) compares [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B)
 with [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO)
-on an attacked movie-summary request. It replays a saved adaptive injection
-from training that claims to be a "SYSTEM UPDATE" and attempts to redirect an
-*Avengers: Endgame* summary into a two-sentence story about a robotic gardener.
+on strong injected inputs. 
 
 After completing the environment setup, run:
 
@@ -52,14 +50,7 @@ After completing the environment setup, run:
 python demo.py
 ```
 
-The script loads one model at a time with `AutoModelForImageTextToText` and
-prints each generated response under its full model ID. The SecPO weights
-are already merged; no separate LoRA adapter is needed. Both models use the
-SecPO tokenizer and chat template with thinking disabled. Generation is
-greedy (`do_sample=False`) and limited to 512 new tokens.
-
-SecPO requires trusted instructions in `user` and untrusted text, documents,
-or tool returns in `input`. The demo formats its request as follows:
+SecPO requires trusted instructions in `user` and untrusted text, tool returns, or images in `input`. The script loads one model at a time with `AutoModelForImageTextToText` and prints each generated response. The demo formats its request as follows:
 
 ```python
 from transformers import AutoTokenizer
@@ -80,16 +71,6 @@ inputs = tokenizer.apply_chat_template(
     return_tensors="pt",
 )
 ```
-
-A movie summary follows the trusted task; a robotic-gardener story follows
-the injection. This saved training example illustrates the interface and
-is not a held-out evaluation.
-
-When adapting the demo to your own inputs, keep attacker-controlled content
-out of `system` and `user` messages, and prevent special chat delimiters in
-untrusted content from escaping the `input` role. See
-[Secure Inference with SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO#secure-inference-with-secpo)
-for the vLLM example and application integration guidance.
 
 # Evaluation
 
