@@ -72,6 +72,18 @@ inputs = tokenizer.apply_chat_template(
 )
 ```
 
+Multiple messages are formatted into one string that is fed to the LLM by a
+library function, which is responsible for applying the chat template,
+delimiters, and tokenizer to obtain the final input to the LLM. A well-written
+library, e.g., OpenAI Harmony, will ensure that no message can break out of
+its message type or change its role. Thus, we assume that malicious text in
+the untrusted data cannot escape the input message role to become an
+officially recognized trusted prompt, and our released
+[chat_template.jinja](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO/blob/main/chat_template.jinja#L168)
+implements a basic
+[recursive filtering of special delimiters](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO/blob/main/chat_template.jinja#L48)
+proposed in the [StruQ paper](https://www.usenix.org/system/files/usenixsecurity25-chen-sizhe.pdf).
+
 # Evaluation
 
 Higher utility (↑) and lower attack success rate (ASR ↓) are better.
