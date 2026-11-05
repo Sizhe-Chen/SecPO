@@ -267,8 +267,6 @@ and render the training prompts with its tokenizer and chat template.
 
 # Quantized Models and Speculative Decoding
 
-Quantized model: [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit).
-
 An **8-bit Q8_0** conversion of the defended Qwen3.6-27B runs with
 [llama.cpp](https://github.com/ggml-org/llama.cpp) on a **single RTX 5090
 with 32 GB of memory**. Reusing the existing DFlash drafter without additional
@@ -285,9 +283,9 @@ decoding (SD):
 | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | Original BF16 | 26.9% | 22.0% |
 | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | Original BF16 | 0.0% | 0.0% |
 | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | Q8_0 | 11.2% | 15.5% |
-| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | Q8_0 | 0.0% | 0.0% |
+| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit) | Q8_0 | 0.0% | 0.0% |
 | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | Q8_0 + SD | 11.6% | 15.5% |
-| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) | Q8_0 + SD | 0.0% | 0.0% |
+| [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-8Bit) | Q8_0 + SD | 0.0% | 0.0% |
 
 The released checkpoint uses bitsandbytes INT8; the measurements above are
 for the llama.cpp Q8_0 conversion.
