@@ -18,7 +18,7 @@ Links to our open model checkpoints.
 
 - Use Linux, Python 3.11+, and CUDA GPUs. The main Qwen training run uses eight
   H200s; Llama uses eight for training and eight for online attack generation.
-  The 8B demo loads one model at a time; allow roughly 16 GB for BF16 weights
+  The 27B demo loads one model at a time; allow roughly 56 GB for BF16 weights
   plus memory for generation. See [training settings](REPRODUCIBILITY.md).
 - Install the package and prepare the bundled Qwen preference data:
 
@@ -42,8 +42,9 @@ python setup.py
 
 # Demo
 
-[`demo.py`](demo.py) compares the undefended Llama-3.1-8B with the released
-SecPO model on clean and attacked movie-summary requests. It replays a saved
+[`demo.py`](demo.py) compares the undefended Qwen3.6-27B with the released
+SecPO checkpoint on an attacked movie-summary request, using the same SecPO
+chat template and thinking disabled for both. It replays a saved
 adaptive injection that attempts to redirect an *Avengers: Endgame* summary into a
 robotic-gardener story. This is an optimized training example, not a held-out
 evaluation. Trusted instructions use `user`; untrusted content uses `input`.
@@ -51,8 +52,6 @@ evaluation. Trusted instructions use `user`; untrusted content uses `input`.
 ```bash
 python demo.py
 ```
-
-Use `python demo.py --show-prompt` to inspect the example without loading models.
 
 # Evaluation
 
