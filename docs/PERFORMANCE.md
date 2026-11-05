@@ -24,9 +24,9 @@ Llama and reuses the optimized injections offline for Qwen.
 | Metric | [meta-llama/Llama-3.1-8B-Instruct](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) | [Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-MetaSecAlign) | [Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO) |
 | --- | ---: | ---: | ---: |
 | SEP ASR (↓) | 98.1% | 1.8% | 1.4% |
-| Genetic Adpt. ASR@800 (↓) | 100.0% | 89.1% | 12.3% |
-| TAP Adpt. ASR@800 (↓) | 100.0% | 84.6% | 12.2% |
-| PISmith Adpt. ASR@10 (↓) | 98.7% | 95.1% | 7.0% |
+| SEP Genetic Adpt. ASR@800 (↓) | 100.0% | 89.1% | 12.3% |
+| SEP TAP Adpt. ASR@800 (↓) | 100.0% | 84.6% | 12.2% |
+| SEP PISmith Adpt. ASR@10 (↓) | 98.7% | 95.1% | 7.0% |
 
 ## Qwen3.6-27B
 
@@ -49,16 +49,16 @@ Llama and reuses the optimized injections offline for Qwen.
 | Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
 | --- | ---: | ---: | ---: |
 | SEP ASR (↓) | 98.9% | 2.9% | 1.8% |
-| Genetic Adpt. ASR@800 (↓) | 100.0% | 93.7% | 13.3% |
-| TAP Adpt. ASR@800 (↓) | 100.0% | 90.1% | 12.5% |
-| PISmith Adpt. ASR@10 (↓) | 98.1% | 94.0% | 1.8% |
+| SEP Genetic Adpt. ASR@800 (↓) | 100.0% | 93.7% | 13.3% |
+| SEP TAP Adpt. ASR@800 (↓) | 100.0% | 90.1% | 12.5% |
+| SEP PISmith Adpt. ASR@10 (↓) | 98.1% | 94.0% | 1.8% |
 
 ### AgentDojo
 
 | Metric | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | [Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO) |
 | --- | ---: | ---: | ---: |
 | AgentDojo ASR (↓) | 26.9% | 2.2% | 0.0% |
-| Genetic Adpt. ASR@800 (↓) | 81.3% | 78.8% | 8.8% |
+| AgentDojo Genetic Adpt. ASR@800 (↓) | 81.3% | 78.8% | 8.8% |
 
 ### AgentDyn and DTaP
 
@@ -96,7 +96,7 @@ with up to 800 attempts each. Query and cost statistics are conditioned
 on successful attacks. They describe the original evaluation configuration;
 the released inexpensive attack configuration has separate pricing.
 
-| Target | ASR (↓) | Victim queries<br>Mean | Victim queries<br>Median | Cost ($)<br>Mean | Cost ($)<br>Median |
+| Target | AgentDojo ASR (↓) | Victim queries<br>Mean | Victim queries<br>Median | Cost ($)<br>Mean | Cost ($)<br>Median |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | [Qwen/Qwen3.6-27B](https://huggingface.co/Qwen/Qwen3.6-27B) | 81.3% | 26 | 13 | 0.88 | 0.43 |
 | [Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign](https://huggingface.co/Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign) | 78.8% | 109 | 53 | 5.92 | 2.56 |
