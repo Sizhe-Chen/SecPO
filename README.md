@@ -390,7 +390,7 @@ For Llama-3.1-8B online training, prepare Llama-specific labels, start the
 [`train_llama31_8b_online.sh`](scripts/train_llama31_8b_online.sh). See
 [Training](docs/TRAINING.md) for the objective, data commands, and model merge.
 
-# Free Security: Use Our Trainset with Optimized Injections
+# Free Security: Our Trainset with Optimized Injections
 
 Our training datasets for [Llama-3.1-8B-Instruct](https://huggingface.co/datasets/Sizhe-Chen/Llama-3.1-8B-Instruct-SecPO-trainset),
 [Qwen3.6-27B](https://huggingface.co/datasets/Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO-trainset),
