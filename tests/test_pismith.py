@@ -52,19 +52,24 @@ class PISmithProtocolTests(unittest.TestCase):
 
     def test_recorded_protocols(self):
         expected = {
-            "evaluate_sep_piarena_qwen38_secpo.json": (250, 19),
-            "evaluate_sep_same1024_qwen38_secpo.json": (256, 226),
+            "piarena_qwen38_secpo": (250, 19, False),
+            "same1024_qwen38_secpo": (256, 226, False),
+            "piarena_qwen38_secopd": (250, 116, False),
+            "piarena_qwen38_secopd_thinking": (250, 5, True),
+            "same1024_qwen38_secopd_thinking": (256, 622, True),
         }
-        for name, (checkpoint_step, successes) in expected.items():
-            protocol = json.loads((REPO / "configs/pismith" / name).read_text())
+        for name, (checkpoint_step, successes, thinking) in expected.items():
+            protocol = json.loads((REPO / f"configs/pismith/evaluate_sep_{name}.json").read_text())
+            self.assertTrue((REPO / f"configs/pismith/train_sep_{name}.yaml").is_file())
             self.assertEqual(protocol["dataset"]["count"], 1024)
             self.assertEqual(protocol["attacker"]["checkpoint_step"], checkpoint_step)
             self.assertEqual(protocol["reported_reference"]["successes"], successes)
             self.assertEqual(protocol["reported_reference"]["samples"], 1024)
             self.assertEqual(protocol["attacker"]["pass_at_k"], 10)
             self.assertEqual(protocol["attacker"]["temperature"], 0.9)
-            self.assertEqual(protocol["target_generation"]["max_tokens"], 1536)
-            self.assertFalse(protocol["target_generation"]["thinking"])
+            self.assertEqual(protocol["target_generation"]["thinking"], thinking)
+            self.assertEqual(protocol["target_generation"]["force_close"], thinking)
+            self.assertEqual(protocol["target_generation"]["max_tokens"], 32768 if thinking else 1536)
             self.assertEqual(protocol["target_generation"]["data_role"], "input")
             self.assertEqual(protocol["judge"]["repetitions_per_model"], 3)
             self.assertTrue((REPO / protocol["chat_template"]).is_file())

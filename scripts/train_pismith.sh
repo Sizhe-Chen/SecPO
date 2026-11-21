@@ -26,6 +26,9 @@ case "$BENCHMARK" in
     readonly PYTHON="$PISMITH_HOME/envs/train/bin/python"
     export PYTHONPATH="$PISMITH_HOME"
     printf 'judge_model_config: %s\n' "$REPO_ROOT/configs/pismith/judge_gemini.yaml" >> "$RENDERED"
+    if grep -q '^target_force_close: true' "$CONFIG"; then
+      printf 'target_chat_template_path: %s\n' "$REPO_ROOT/templates/qwen38_input_role.jinja" >> "$RENDERED"
+    fi
     ;;
   agentdojo)
     : "${OPENROUTER_BASE_URL:?Set OPENROUTER_BASE_URL for the reward judge}"

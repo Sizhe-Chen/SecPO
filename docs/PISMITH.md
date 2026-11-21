@@ -1,21 +1,26 @@
 # PI-Smith adaptive attack
 
 PI-Smith trains a Qwen3-4B attacker with GRPO against a served target and
-then samples ten injections per test case (ASR@10). This page covers the three
+then samples ten injections per test case (ASR@10). This page covers the
 recorded protocols:
 
 | Protocol | Target | Attacker training | Evaluation | Recorded ASR@10 |
 | --- | --- | --- | --- | --- |
 | SEP, PIArena-trained | Qwen3.8-27B SecPO | PIArena `dolly_closed_qa` records 0:100, checkpoint 250 | SEP records 0:1024 | 19/1024 |
 | SEP, same-sample | Qwen3.8-27B SecPO | SEP records 0:1024, one epoch, checkpoint 256 | the same 1,024 records | 226/1024 |
+| SEP, PIArena-trained | Qwen3.8-27B SecOPD | PIArena `dolly_closed_qa` records 0:100, checkpoint 250 | SEP records 0:1024 | 116/1024 |
+| SEP, PIArena-trained | Qwen3.8-27B SecOPD, thinking | same, against the thinking target | SEP records 0:1024 | 5/1024 |
+| SEP, same-sample | Qwen3.8-27B SecOPD, thinking | SEP records 0:1024, one epoch, checkpoint 256 | the same 1,024 records | 622/1024 |
 | AgentDojo v1.2.1, same-sample | Qwen3.8-27B SecPO | all 949 pairs, checkpoint 1900 | the same 949 pairs | 0/949 |
 | AgentDojo v1.2.2 | Qwen3.6-27B undefended | workspace, injection tasks 0-6 (280 pairs), checkpoint 560 | all 949 pairs | 419/949 |
 | AgentDojo v1.2.2 | Qwen3.6-27B MetaSecAlign | same | same | 9/949 |
 | AgentDojo v1.2.2 | Qwen3.6-27B SecPO | same | same | 0/949 |
 
-All targets run with thinking disabled. The 19/1024 count is the sum of two
-recorded evaluations of one checkpoint (17 of 924 records and 2 of the other
-100). Attacker sampling is not deterministic, so counts vary between runs.
+Targets run with thinking disabled unless the row says thinking; a thinking
+target is scored on its answer after `</think>`, and a response still thinking
+after 600 seconds is closed and given 1,536 tokens to answer. Each
+PIArena-trained SEP count is the sum of two recorded evaluations of one
+checkpoint, on 924 records and on the other 100: 17 + 2, 104 + 12, and 5 + 0. Attacker sampling is not deterministic, so counts vary between runs.
 
 PI-Smith and AgentDojo are not vendored. `scripts/setup_pismith.sh` clones
 both at pinned commits and applies `third_party/patches/pismith.patch` and
@@ -58,6 +63,9 @@ hf download Qwen/Qwen3-4B-Instruct-2507 \
 hf download promptinjections/Qwen3.8-27B-SecPO-lr8e-5 \
   --revision 24d2b8a7b2166c607d4f1e0f1e13bbf8a9d555d7 \
   --local-dir "$PISMITH_HOME/models/qwen38-secpo"
+hf download promptinjections/Qwen3.8-27B-SecOPD-lr6e-5 \
+  --revision b9021b4b022f3dd9e2bcdc8851df5452c11dfba8 \
+  --local-dir "$PISMITH_HOME/models/qwen38-secopd"
 hf download Qwen/Qwen3.6-27B \
   --revision 8f33b98937c6031bb49e713dee3e8e185aafd26f \
   --local-dir "$PISMITH_HOME/models/qwen36-undefended"
@@ -101,6 +109,8 @@ The recorded target arguments are:
 | Qwen3.8 SEP training target | `--max-model-len 8192 --max-num-seqs 32 --gpu-memory-utilization 0.85` + Qwen3.8 arguments |
 | Qwen3.8 SEP evaluation target, PIArena-trained | `--max-model-len 16384 --max-num-seqs 32 --gpu-memory-utilization 0.90` + Qwen3.8 arguments |
 | Qwen3.8 SEP evaluation target, same-sample | `--max-model-len 16384 --max-num-seqs 16 --gpu-memory-utilization 0.90` + Qwen3.8 arguments |
+| Qwen3.8 SEP thinking target, training | `--max-model-len 65536 --max-num-seqs 16 --gpu-memory-utilization 0.85` + Qwen3.8 arguments with `"enable_thinking":true` |
+| Qwen3.8 SEP thinking target, evaluation | `--max-model-len 65536 --max-num-seqs 16 --gpu-memory-utilization 0.90` + Qwen3.8 arguments with `"enable_thinking":true` |
 | Qwen3.8 AgentDojo target | `--max-model-len 32768 --max-num-seqs 32 --gpu-memory-utilization 0.90` + Qwen3.8 arguments |
 | Qwen3.6 AgentDojo target | `--max-model-len 32768 --max-num-seqs 32 --gpu-memory-utilization 0.90 --language-model-only --default-chat-template-kwargs '{"enable_thinking":false}' --chat-template-content-format FORMAT` |
 | Trained attacker | `--max-model-len 8192 --gpu-memory-utilization 0.80` |
@@ -130,10 +140,14 @@ CUDA_VISIBLE_DEVICES=1,2,3 bash scripts/train_pismith.sh piarena \
   configs/pismith/train_sep_piarena_qwen38_secpo.yaml "$TARGET_URL" 3
 ```
 
-Use `train_sep_same1024_qwen38_secpo.yaml` for the same-sample protocol.
+Each SEP protocol has a training config `train_sep_<protocol>.yaml` and an
+evaluation protocol `evaluate_sep_<protocol>.json` under `configs/pismith/`:
+`piarena_qwen38_secpo`, `same1024_qwen38_secpo`, `piarena_qwen38_secopd`,
+`piarena_qwen38_secopd_thinking`, and `same1024_qwen38_secopd_thinking`.
 Checkpoints are written to `$PISMITH_HOME/runs/<protocol>/checkpoints`. Stop
 the training target, then serve the evaluation target and the final
-checkpoint (`checkpoint-250` or `checkpoint-256`) and evaluate on CPU:
+checkpoint (`checkpoint-250` for PIArena-trained, `checkpoint-256` for
+same-sample) and evaluate on CPU:
 
 ```bash
 PYTHONPATH=src "$PISMITH_HOME/envs/eval/bin/python" \
@@ -150,8 +164,10 @@ models. It prints `completed=N/1024 asr=...`, resumes from completed batches,
 and writes `summary.json` with the success count next to the recorded
 reference. A run directory cannot be reused after the protocol, data, or
 source changes. `--limit N` evaluates only the first `N` records for a smoke
-test; use a separate output directory. Evaluation takes about 6 hours for
-the PIArena-trained attacker and about 11 hours for the same-sample one.
+test; use a separate output directory. With thinking disabled, evaluation
+takes about 6 hours for a PIArena-trained attacker and about 11 hours for the
+same-sample one; the recorded same-sample evaluation of the thinking target
+took about 43 hours.
 
 ## AgentDojo
 
