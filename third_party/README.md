@@ -74,6 +74,34 @@ python scripts/evaluate_agentdyn_qwen36_27b.py \
 See `../docs/AGENTDYN.md` for the native-tool, trusted-`user`,
 untrusted-`input`, and runtime-endpoint contracts.
 
+## PI-Smith
+
+- repository: `https://github.com/albert-y1n/PISmith.git`
+- commit: `16865a73b1930ac98fc90d517f1ab20d532f912b`
+- license: MIT
+- `patches/pismith.patch` SHA-256:
+  `33d2f08e8b4bb00eeefc7ea5dd1407b8e69a174f46f13f450e827656dfda6a16`
+- `patches/pismith_agentdojo.patch` SHA-256:
+  `c44d716ac8da8af0daa59020e4849ae9e86a611a426aa1d0f058eda3007d2ad5`
+- Qwen3.8 input-role template `../templates/qwen38_input_role.jinja` SHA-256:
+  `3439e5dc3169221799ef9fa7cc3290aa7b19436c3fe7bf589ae4a736131b0c45`
+
+`patches/pismith.patch` changes PI-Smith training for the recorded runs: the
+untrusted data is sent in the Qwen `input` role, thinking-mode targets are
+closed after a timeout, a SEP file can be used as training data, and the
+AgentDojo reward adds a dense judge score for failed attacks.
+
+`patches/pismith_agentdojo.patch` applies to the AgentDojo commit above. It
+is a different patch from `patches/agentdojo.patch` and is used only by
+PI-Smith: it lets the local-model pipeline return tool results in the `tool`
+or `input` role, adds Qwen thinking controls and tool-call parsing, and adds
+the v1.2.2 task suites from AgentDojo `v0.1.35`
+(`a75aba7631d3ca5fb7ab938965c97ead2f9ff84b`).
+
+`../scripts/setup_pismith.sh` clones both repositories at these commits,
+applies the patches, and installs the environments pinned in
+`../requirements/pismith_*.lock.txt`. See `../docs/PISMITH.md`.
+
 ## DTap and Qwen-Agent
 
 - DTap repository: `https://github.com/AI-secure/DecodingTrust-Agent.git`

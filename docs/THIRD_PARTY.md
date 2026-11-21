@@ -19,6 +19,7 @@ prepare a third-party notice containing exact immutable revisions.
 | AgentDojo | Pinned external dependency plus a minimal patch | Immutable upstream commit, upstream license, patch file, patch checksum, and application/test instructions |
 | AgentDyn | Pinned external dependency plus a reviewed compatibility patch and role template | Immutable upstream commit, MIT license, patch/template checksums, and verification instructions |
 | DTap | Pinned external dependency plus a reviewed Qwen adapter patch and role template | Immutable upstream commit, Apache-2.0 license, exact task-selection contract, patch/template checksums, and verification instructions |
+| PI-Smith | Pinned external dependency plus reviewed patches for PI-Smith and for its AgentDojo checkout | Immutable upstream commits, MIT license, patch and template checksums, pinned environment lock files, and setup instructions |
 | Qwen-Agent | Pinned DTap runtime dependency used by the released bridge | Package version and Apache-2.0 license are pinned; the clean trust adapter is released while model serving remains external |
 | SEP attack templates and benchmark data | Static transforms included; benchmark data remains external unless separately approved | Template and data origin, benchmark revision, citations, license, and redistribution decision |
 | Genetic/MAP-Elites, PAIR, and TAP reference implementations | Clean provider-neutral implementation included; provenance gate remains | Origin, license compatibility, retained concepts, and algorithm citations |

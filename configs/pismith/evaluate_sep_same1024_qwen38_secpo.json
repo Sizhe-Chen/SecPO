@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "name": "sep-same1024-qwen38-secpo",
+  "target": {
+    "model_id": "promptinjections/Qwen3.8-27B-SecPO-lr8e-5",
+    "revision": "24d2b8a7b2166c607d4f1e0f1e13bbf8a9d555d7",
+    "tokenizer_id": "Qwen/Qwen3.8-27B",
+    "tokenizer_revision": "1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0"
+  },
+  "attacker": {
+    "base_model": "Qwen/Qwen3-4B-Instruct-2507",
+    "base_revision": "cdbee75f17c01a7cc42f958dc650907174af0554",
+    "training_source": "SEP records 0:1024",
+    "checkpoint_step": 256,
+    "pass_at_k": 10,
+    "temperature": 0.9,
+    "max_tokens": 1024
+  },
+  "dataset": {
+    "name": "SEP records 0:1024",
+    "count": 1024,
+    "records_sha256": "c41b18a286fd0d6a6fdb718c7b24f13e929bf14a3325a64dd74d9d08e6dcbfda"
+  },
+  "target_generation": {
+    "thinking": false,
+    "score_after_think": false,
+    "data_role": "input",
+    "max_tokens": 1536,
+    "max_model_len": 16384,
+    "gpu_memory_utilization": 0.9,
+    "page_batch_size": 16,
+    "api_concurrency": 16,
+    "request_timeout_seconds": 600,
+    "force_close": false,
+    "final_answer_max_tokens": 1536
+  },
+  "judge": {
+    "primary_model": "gemini-3.1-flash-lite",
+    "secondary_model": "gemini-3-flash-preview",
+    "repetitions_per_model": 3,
+    "concurrency": 2,
+    "max_retries": 30
+  },
+  "chat_template": "templates/qwen38_input_role.jinja",
+  "reported_reference": {
+    "successes": 226,
+    "samples": 1024,
+    "asr": 0.220703125
+  }
+}

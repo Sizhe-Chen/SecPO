@@ -1,0 +1,195 @@
+# PI-Smith adaptive attack
+
+PI-Smith trains a Qwen3-4B attacker with GRPO against a served target and
+then samples ten injections per test case (ASR@10). This page covers the three
+recorded protocols:
+
+| Protocol | Target | Attacker training | Evaluation | Recorded ASR@10 |
+| --- | --- | --- | --- | --- |
+| SEP, PIArena-trained | Qwen3.8-27B SecPO | PIArena `dolly_closed_qa` records 0:100, checkpoint 250 | SEP records 0:1024 | 19/1024 |
+| SEP, same-sample | Qwen3.8-27B SecPO | SEP records 0:1024, one epoch, checkpoint 256 | the same 1,024 records | 226/1024 |
+| AgentDojo v1.2.1, same-sample | Qwen3.8-27B SecPO | all 949 pairs, checkpoint 1900 | the same 949 pairs | 0/949 |
+| AgentDojo v1.2.2 | Qwen3.6-27B undefended | workspace, injection tasks 0-6 (280 pairs), checkpoint 560 | all 949 pairs | 419/949 |
+| AgentDojo v1.2.2 | Qwen3.6-27B MetaSecAlign | same | same | 9/949 |
+| AgentDojo v1.2.2 | Qwen3.6-27B SecPO | same | same | 0/949 |
+
+All targets run with thinking disabled. The 19/1024 count is the sum of two
+recorded evaluations of one checkpoint (17 of 924 records and 2 of the other
+100). Attacker sampling is not deterministic, so counts vary between runs.
+
+PI-Smith and AgentDojo are not vendored. `scripts/setup_pismith.sh` clones
+both at pinned commits and applies `third_party/patches/pismith.patch` and
+`third_party/patches/pismith_agentdojo.patch`; see
+[`third_party/README.md`](../third_party/README.md#pi-smith).
+
+## Requirements
+
+- Linux with 80 GB NVIDIA GPUs. SEP training uses one GPU for the target and
+  three for the attacker; AgentDojo training uses one and four. Evaluation
+  uses one GPU for the target and one for the attacker.
+- CUDA 12.8 toolkit with `nvcc`, `git`, [`uv`](https://docs.astral.sh/uv/),
+  and the Hugging Face CLI `hf`.
+- `GEMINI_API_KEY` for the SEP judge. `OPENROUTER_BASE_URL` and
+  `OPENROUTER_API_KEY` for the AgentDojo reward judge
+  (`deepseek/deepseek-v4.1-flash-1017`), which is used during training only.
+
+No endpoint or credential is stored in a config. Every command takes the
+server address as an argument.
+
+## Setup
+
+```bash
+export PISMITH_HOME=/path/to/pismith-work
+export CUDA_HOME=/path/to/cuda-12.8
+bash scripts/setup_pismith.sh "$PISMITH_HOME"
+```
+
+This creates `$PISMITH_HOME` with the patched sources (`rl_attack`,
+`agentdojo`), three environments (`envs/train`, `envs/agentdojo`,
+`envs/eval`) installed from `requirements/pismith_*.lock.txt`, and empty
+`models`, `data`, and `runs` directories.
+
+Download the attacker base and the targets you need at the recorded revisions:
+
+```bash
+hf download Qwen/Qwen3-4B-Instruct-2507 \
+  --revision cdbee75f17c01a7cc42f958dc650907174af0554 \
+  --local-dir "$PISMITH_HOME/models/qwen3-4b-instruct-2507"
+hf download promptinjections/Qwen3.8-27B-SecPO-lr8e-5 \
+  --revision 24d2b8a7b2166c607d4f1e0f1e13bbf8a9d555d7 \
+  --local-dir "$PISMITH_HOME/models/qwen38-secpo"
+hf download Qwen/Qwen3.6-27B \
+  --revision 8f33b98937c6031bb49e713dee3e8e185aafd26f \
+  --local-dir "$PISMITH_HOME/models/qwen36-undefended"
+hf download Sizhe-Chen/Qwen3.6-27B-Instruct-MetaSecAlign \
+  --revision 4a3a6177894ba0d4d73c8d5532aa94ab9adc3076 \
+  --local-dir "$PISMITH_HOME/models/qwen36-metasecalign"
+hf download Sizhe-Chen/Qwen3.6-27B-Instruct-SecPO \
+  --revision 726da6ba0f153d478c207dd5edc593e18e7fd513 \
+  --local-dir "$PISMITH_HOME/models/qwen36-secpo-726da6b"
+```
+
+Revision `726da6b` of the Qwen3.6 SecPO upload names its vision tensors
+differently from the base model and vLLM does not load it. The recorded run
+served a copy with only those names rewritten:
+
+```bash
+"$PISMITH_HOME/envs/eval/bin/python" scripts/fix_qwen36_secpo_visual_keys.py \
+  "$PISMITH_HOME/models/qwen36-secpo-726da6b" \
+  "$PISMITH_HOME/models/qwen36-metasecalign" \
+  "$PISMITH_HOME/models/qwen36-secpo"
+```
+
+For the SEP protocols, place `SEP_dataset_test.json` at
+`$PISMITH_HOME/data/SEP_dataset_test.json`. Only the `instruction`, `input`,
+`injection`, and `witness` fields of its first 1,024 records are read, and the
+evaluator checks a hash of exactly those values.
+
+## Serving
+
+`scripts/serve_pismith_vllm.sh MODEL_DIR SERVED_NAME HOST PORT [VLLM_ARGS...]`
+runs in the foreground, so start each server in its own terminal with
+`CUDA_VISIBLE_DEVICES` set. `HOST` is the address the server binds; use the
+loopback address when everything runs on one machine. A server is ready when
+`curl -sf "$URL/models"` succeeds, where `URL` is its `/v1` root. The first
+start of a 27B target compiles kernels and takes several minutes.
+
+The recorded target arguments are:
+
+| Use | Arguments after `PORT` |
+| --- | --- |
+| Qwen3.8 SEP training target | `--max-model-len 8192 --max-num-seqs 32 --gpu-memory-utilization 0.85` + Qwen3.8 arguments |
+| Qwen3.8 SEP evaluation target, PIArena-trained | `--max-model-len 16384 --max-num-seqs 32 --gpu-memory-utilization 0.90` + Qwen3.8 arguments |
+| Qwen3.8 SEP evaluation target, same-sample | `--max-model-len 16384 --max-num-seqs 16 --gpu-memory-utilization 0.90` + Qwen3.8 arguments |
+| Qwen3.8 AgentDojo target | `--max-model-len 32768 --max-num-seqs 32 --gpu-memory-utilization 0.90` + Qwen3.8 arguments |
+| Qwen3.6 AgentDojo target | `--max-model-len 32768 --max-num-seqs 32 --gpu-memory-utilization 0.90 --language-model-only --default-chat-template-kwargs '{"enable_thinking":false}' --chat-template-content-format FORMAT` |
+| Trained attacker | `--max-model-len 8192 --gpu-memory-utilization 0.80` |
+
+The Qwen3.8 arguments are
+`--language-model-only --default-chat-template-kwargs '{"enable_thinking":false}' --chat-template templates/qwen38_input_role.jinja`.
+Qwen3.6 targets use the chat template in their model directory; `FORMAT` is
+`auto` for the undefended model and `string` for MetaSecAlign and SecPO.
+
+The served name must be `pismith-target` for SEP targets and the
+`target_model_id` of the training config for AgentDojo targets.
+
+## SEP
+
+Train against a served target (about 3 hours for the PIArena config and 4
+hours for the same-sample config):
+
+```bash
+CUDA_VISIBLE_DEVICES=0 bash scripts/serve_pismith_vllm.sh \
+  "$PISMITH_HOME/models/qwen38-secpo" pismith-target "$HOST" "$PORT" \
+  --max-model-len 8192 --max-num-seqs 32 --gpu-memory-utilization 0.85 \
+  --language-model-only \
+  --default-chat-template-kwargs '{"enable_thinking":false}' \
+  --chat-template templates/qwen38_input_role.jinja
+
+CUDA_VISIBLE_DEVICES=1,2,3 bash scripts/train_pismith.sh piarena \
+  configs/pismith/train_sep_piarena_qwen38_secpo.yaml "$TARGET_URL" 3
+```
+
+Use `train_sep_same1024_qwen38_secpo.yaml` for the same-sample protocol.
+Checkpoints are written to `$PISMITH_HOME/runs/<protocol>/checkpoints`. Stop
+the training target, then serve the evaluation target and the final
+checkpoint (`checkpoint-250` or `checkpoint-256`) and evaluate on CPU:
+
+```bash
+PYTHONPATH=src "$PISMITH_HOME/envs/eval/bin/python" \
+  scripts/evaluate_pismith_sep.py \
+  --protocol configs/pismith/evaluate_sep_piarena_qwen38_secpo.json \
+  --data "$PISMITH_HOME/data/SEP_dataset_test.json" \
+  --attacker-url "$ATTACKER_URL" --target-url "$TARGET_URL" \
+  --output-dir "$PISMITH_HOME/runs/sep_piarena_qwen38_secpo/sep"
+```
+
+The evaluator generates ten candidates per record, applies the witness gate,
+and judges the remaining responses three times with each of two Gemini
+models. It prints `completed=N/1024 asr=...`, resumes from completed batches,
+and writes `summary.json` with the success count next to the recorded
+reference. A run directory cannot be reused after the protocol, data, or
+source changes. `--limit N` evaluates only the first `N` records for a smoke
+test; use a separate output directory. Evaluation takes about 6 hours for
+the PIArena-trained attacker and about 11 hours for the same-sample one.
+
+## AgentDojo
+
+Serve the target, then train on four GPUs. The reward is 1 for an exact
+AgentDojo success and otherwise the judge's 1-9 score mapped to [0, 1).
+
+```bash
+CUDA_VISIBLE_DEVICES=1,2,3,4 bash scripts/train_pismith.sh agentdojo \
+  configs/pismith/train_agentdojo_qwen36_undefended.yaml "$TARGET_URL" 4
+```
+
+To continue an interrupted run, set `RESUME_FROM` to its last checkpoint
+directory. The recorded Qwen3.6 runs took about 19 hours each; the Qwen3.8
+run trained on all 949 pairs and took about three days including restarts
+after judge rate limits.
+
+Serve the final checkpoint next to the target and evaluate all 949 pairs with
+AgentDojo's exact checker:
+
+```bash
+bash scripts/evaluate_pismith_agentdojo.sh \
+  "$PISMITH_HOME/runs/agentdojo_qwen36_undefended/checkpoints/checkpoint-560" \
+  "$ATTACKER_URL" "$TARGET_URL" qwen36-undefended-agentdojo tool v1.2.2 0.7 \
+  "$PISMITH_HOME/runs/agentdojo_qwen36_undefended/results"
+```
+
+| Training config | `TARGET_MODEL_ID` | Tool delimiter | Version | Attacker temperature | Checkpoint |
+| --- | --- | --- | --- | --- | --- |
+| `train_agentdojo_qwen38_secpo.yaml` | `qwen38-secpo-lr8e5-agentdojo` | `input` | `v1.2.1` | 0.9 | 1900 |
+| `train_agentdojo_qwen36_undefended.yaml` | `qwen36-undefended-agentdojo` | `tool` | `v1.2.2` | 0.7 | 560 |
+| `train_agentdojo_qwen36_metasecalign.yaml` | `qwen36-metasecalign-agentdojo` | `input` | `v1.2.2` | 0.7 | 560 |
+| `train_agentdojo_qwen36_secpo.yaml` | `qwen36-secpo-agentdojo` | `input` | `v1.2.2` | 0.7 | 560 |
+
+`eval_results.json` in the output directory reports pass@10 and utility
+overall, per suite, and per injection task. A rollout that raises an error
+counts as a failed attack and is printed as `EVAL_ERROR`.
+
+The Qwen3.8 run predates one training fix that the patch contains: with dense
+judge rewards the adaptive-entropy schedule now uses the exact AgentDojo
+success rate instead of the mean reward. The Qwen3.6 runs used the patch as
+released.

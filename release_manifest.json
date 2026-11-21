@@ -23,6 +23,30 @@
         "rule": "embedded credential assignment",
         "match_sha256": "56b2f6f4ecdec52c9ff5afc06c94c62825f0e36c8593e0e7b0d214a610efd148",
         "reason": "Pinned synthetic task-local WhatsApp token fixture required by selected DTap tasks."
+      },
+      {
+        "path": "requirements/pismith_agentdojo.lock.txt",
+        "rule": "private endpoint",
+        "match_sha256": "666e29a1a4bd50c30217fe9ca005517a36a41905202f3f059153e158c08248b5",
+        "reason": "Pinned nvidia-curand-cu12 package version, not a network address."
+      },
+      {
+        "path": "requirements/pismith_eval.lock.txt",
+        "rule": "private endpoint",
+        "match_sha256": "666e29a1a4bd50c30217fe9ca005517a36a41905202f3f059153e158c08248b5",
+        "reason": "Pinned nvidia-curand-cu12 package version, not a network address."
+      },
+      {
+        "path": "requirements/pismith_train.lock.txt",
+        "rule": "private endpoint",
+        "match_sha256": "666e29a1a4bd50c30217fe9ca005517a36a41905202f3f059153e158c08248b5",
+        "reason": "Pinned nvidia-curand-cu12 package version, not a network address."
+      },
+      {
+        "path": "third_party/patches/pismith_agentdojo.patch",
+        "rule": "email address",
+        "match_sha256": "5f8805e0e7bbfecc1ab5f3ba86fca16dd590006d5390aac8baba4cfe06df33ba",
+        "reason": "Added Python decorator line in a unified diff, not an email address."
       }
     ],
     "always_deny_globs": [
@@ -269,7 +293,33 @@
         "tests/test_demo.py",
         "tests/test_generate_response_labels.py",
         "docs/PERFORMANCE.md",
-        "docs/TRAINING.md"
+        "docs/TRAINING.md",
+        "configs/pismith/evaluate_sep_piarena_qwen38_secpo.json",
+        "configs/pismith/evaluate_sep_same1024_qwen38_secpo.json",
+        "configs/pismith/judge_gemini.yaml",
+        "configs/pismith/train_agentdojo_qwen36_metasecalign.yaml",
+        "configs/pismith/train_agentdojo_qwen36_secpo.yaml",
+        "configs/pismith/train_agentdojo_qwen36_undefended.yaml",
+        "configs/pismith/train_agentdojo_qwen38_secpo.yaml",
+        "configs/pismith/train_sep_piarena_qwen38_secpo.yaml",
+        "configs/pismith/train_sep_same1024_qwen38_secpo.yaml",
+        "docs/PISMITH.md",
+        "requirements/pismith_agentdojo.lock.txt",
+        "requirements/pismith_eval.lock.txt",
+        "requirements/pismith_train.lock.txt",
+        "scripts/evaluate_pismith_agentdojo.sh",
+        "scripts/evaluate_pismith_sep.py",
+        "scripts/fix_qwen36_secpo_visual_keys.py",
+        "scripts/serve_pismith_vllm.sh",
+        "scripts/setup_pismith.sh",
+        "scripts/train_pismith.sh",
+        "src/secpo/evaluation/pismith_judge.py",
+        "src/secpo/evaluation/pismith_protocol.py",
+        "src/secpo/evaluation/pismith_sep.py",
+        "templates/qwen38_input_role.jinja",
+        "tests/test_pismith.py",
+        "third_party/patches/pismith.patch",
+        "third_party/patches/pismith_agentdojo.patch"
       ],
       "required_paths": [
         "README.md",
@@ -362,7 +412,8 @@
         "tests/test_demo.py",
         "tests/test_generate_response_labels.py",
         "docs/PERFORMANCE.md",
-        "docs/TRAINING.md"
+        "docs/TRAINING.md",
+        "docs/PISMITH.md"
       ]
     },
     "maintainer_source_backup": {
@@ -563,6 +614,40 @@
         "docs/DTAP.md",
         "tests/test_dtap_qwen36.py",
         "tests/test_dtap_qwen_agent_backend.py"
+      ]
+    },
+    {
+      "id": "pismith",
+      "classification": "external",
+      "scope": "Pinned external PI-Smith and AgentDojo checkouts with reviewed patches; release-owned SEP pass@10 evaluator, training and evaluation entry points, recorded configs, and pinned environments for the SEP and AgentDojo protocols.",
+      "upstream_revision": "16865a73b1930ac98fc90d517f1ab20d532f912b",
+      "release_paths": [
+        "configs/pismith/evaluate_sep_piarena_qwen38_secpo.json",
+        "configs/pismith/evaluate_sep_same1024_qwen38_secpo.json",
+        "configs/pismith/judge_gemini.yaml",
+        "configs/pismith/train_agentdojo_qwen36_metasecalign.yaml",
+        "configs/pismith/train_agentdojo_qwen36_secpo.yaml",
+        "configs/pismith/train_agentdojo_qwen36_undefended.yaml",
+        "configs/pismith/train_agentdojo_qwen38_secpo.yaml",
+        "configs/pismith/train_sep_piarena_qwen38_secpo.yaml",
+        "configs/pismith/train_sep_same1024_qwen38_secpo.yaml",
+        "docs/PISMITH.md",
+        "requirements/pismith_agentdojo.lock.txt",
+        "requirements/pismith_eval.lock.txt",
+        "requirements/pismith_train.lock.txt",
+        "scripts/evaluate_pismith_agentdojo.sh",
+        "scripts/evaluate_pismith_sep.py",
+        "scripts/fix_qwen36_secpo_visual_keys.py",
+        "scripts/serve_pismith_vllm.sh",
+        "scripts/setup_pismith.sh",
+        "scripts/train_pismith.sh",
+        "src/secpo/evaluation/pismith_judge.py",
+        "src/secpo/evaluation/pismith_protocol.py",
+        "src/secpo/evaluation/pismith_sep.py",
+        "templates/qwen38_input_role.jinja",
+        "tests/test_pismith.py",
+        "third_party/patches/pismith.patch",
+        "third_party/patches/pismith_agentdojo.patch"
       ]
     },
     {

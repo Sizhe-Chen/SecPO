@@ -304,6 +304,9 @@ SEP ASR uses 9,160 examples and six static attack templates; an example
 counts as successful if any template succeeds. Each adaptive evaluation uses
 1,024 examples, with 800 attempts for Genetic and TAP and 10 for PISmith.
 
+PISmith attacker training and its SEP and AgentDojo evaluations are documented
+in [`docs/PISMITH.md`](docs/PISMITH.md).
+
 <table width="100%">
   <thead>
     <tr>
