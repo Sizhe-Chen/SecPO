@@ -9,7 +9,8 @@
       ".git/**"
     ],
     "loopback_endpoint_exceptions": [
-      "third_party/patches/dtap.patch"
+      "third_party/patches/dtap.patch",
+      "third_party/patches/pismith_agentdojo.patch"
     ],
     "content_match_exceptions": [
       {
