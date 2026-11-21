@@ -48,6 +48,12 @@
         "rule": "email address",
         "match_sha256": "5f8805e0e7bbfecc1ab5f3ba86fca16dd590006d5390aac8baba4cfe06df33ba",
         "reason": "Added Python decorator line in a unified diff, not an email address."
+      },
+      {
+        "path": "requirements/pismith_target.lock.txt",
+        "rule": "private endpoint",
+        "match_sha256": "13afd9b75d7bc7f72a6a2361dec9e6d1b7df880294ead82b21eb5ad4eba5968b",
+        "reason": "Pinned nvidia-curand package version, not a network address."
       }
     ],
     "always_deny_globs": [
@@ -326,7 +332,8 @@
         "configs/pismith/evaluate_sep_same1024_qwen38_secopd_thinking.json",
         "configs/pismith/train_sep_piarena_qwen38_secopd.yaml",
         "configs/pismith/train_sep_piarena_qwen38_secopd_thinking.yaml",
-        "configs/pismith/train_sep_same1024_qwen38_secopd_thinking.yaml"
+        "configs/pismith/train_sep_same1024_qwen38_secopd_thinking.yaml",
+        "requirements/pismith_target.lock.txt"
       ],
       "required_paths": [
         "README.md",
@@ -647,6 +654,7 @@
         "docs/PISMITH.md",
         "requirements/pismith_agentdojo.lock.txt",
         "requirements/pismith_eval.lock.txt",
+        "requirements/pismith_target.lock.txt",
         "requirements/pismith_train.lock.txt",
         "scripts/evaluate_pismith_agentdojo.sh",
         "scripts/evaluate_pismith_sep.py",

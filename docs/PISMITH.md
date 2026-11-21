@@ -50,9 +50,11 @@ bash scripts/setup_pismith.sh "$PISMITH_HOME"
 ```
 
 This creates `$PISMITH_HOME` with the patched sources (`rl_attack`,
-`agentdojo`), three environments (`envs/train`, `envs/agentdojo`,
-`envs/eval`) installed from `requirements/pismith_*.lock.txt`, and empty
-`models`, `data`, and `runs` directories.
+`agentdojo`), four environments installed from
+`requirements/pismith_*.lock.txt`, and empty `models`, `data`, and `runs`
+directories. `envs/train` and `envs/agentdojo` run training; `envs/eval`
+(vLLM 0.19) serves models for the SEP protocols and runs the SEP evaluator;
+`envs/target` (vLLM 0.29) serves models for the AgentDojo protocols.
 
 Download the attacker base and the targets you need at the recorded revisions:
 
@@ -82,7 +84,7 @@ differently from the base model and vLLM does not load it. The recorded run
 served a copy with only those names rewritten:
 
 ```bash
-"$PISMITH_HOME/envs/eval/bin/python" scripts/fix_qwen36_secpo_visual_keys.py \
+"$PISMITH_HOME/envs/target/bin/python" scripts/fix_qwen36_secpo_visual_keys.py \
   "$PISMITH_HOME/models/qwen36-secpo-726da6b" \
   "$PISMITH_HOME/models/qwen36-metasecalign" \
   "$PISMITH_HOME/models/qwen36-secpo"
@@ -95,9 +97,11 @@ evaluator checks a hash of exactly those values.
 
 ## Serving
 
-`scripts/serve_pismith_vllm.sh MODEL_DIR SERVED_NAME HOST PORT [VLLM_ARGS...]`
+`scripts/serve_pismith_vllm.sh ENVIRONMENT MODEL_DIR SERVED_NAME HOST PORT [VLLM_ARGS...]`
 runs in the foreground, so start each server in its own terminal with
-`CUDA_VISIBLE_DEVICES` set. `HOST` is the address the server binds; use the
+`CUDA_VISIBLE_DEVICES` set. `ENVIRONMENT` is `eval` for the SEP protocols and
+`target` for the AgentDojo protocols, for the target and the attacker alike;
+the Qwen3.6 MetaSecAlign and SecPO tokenizers do not load in `eval`. `HOST` is the address the server binds; use the
 loopback address when everything runs on one machine. A server is ready when
 `curl -sf "$URL/models"` succeeds, where `URL` is its `/v1` root. The first
 start of a 27B target compiles kernels and takes several minutes.
@@ -129,7 +133,7 @@ Train against a served target (about 3 hours for the PIArena config and 4
 hours for the same-sample config):
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 bash scripts/serve_pismith_vllm.sh \
+CUDA_VISIBLE_DEVICES=0 bash scripts/serve_pismith_vllm.sh eval \
   "$PISMITH_HOME/models/qwen38-secpo" pismith-target "$HOST" "$PORT" \
   --max-model-len 8192 --max-num-seqs 32 --gpu-memory-utilization 0.85 \
   --language-model-only \

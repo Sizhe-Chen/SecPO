@@ -81,6 +81,7 @@ class PISmithProtocolTests(unittest.TestCase):
             "templates/qwen38_input_role.jinja": "3439e5dc3169221799ef9fa7cc3290aa7b19436c3fe7bf589ae4a736131b0c45",
             "requirements/pismith_train.lock.txt": "900ac60fd8594b666d70102df7b3d54911b098ccf7c7fb04ac0f068334275a6c",
             "requirements/pismith_agentdojo.lock.txt": "53369971a597372f735d05486ed6a1b5454a688cc216293f1abca98f84a34227",
+            "requirements/pismith_target.lock.txt": "98015b9d4921d93bc4c6b0c313db2054d120200dfd6977ba3abd4c3e2e1fa29c",
             "requirements/pismith_eval.lock.txt": "3e0832a8ecdab636cf4b5be4d5c7615bce7cef8719c81dd2d09bd5faf6b3fcde",
         }
         for path, digest in expected.items():

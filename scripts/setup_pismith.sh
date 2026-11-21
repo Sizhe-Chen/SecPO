@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Build the PI-Smith working directory: patched PI-Smith and AgentDojo sources and three pinned environments.
+# Build the PI-Smith working directory: patched PI-Smith and AgentDojo sources and four pinned environments.
 set -euo pipefail
 
 if [[ $# -ne 1 ]]; then
@@ -40,6 +40,7 @@ install() {  # NAME PYTHON_VERSION
 }
 install train 3.10.20
 install agentdojo 3.10.20
+install target 3.10.20
 install eval 3.12.13
 
 echo "PI-Smith sources and environments are ready in $PISMITH_HOME"
