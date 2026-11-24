@@ -1,9 +1,12 @@
 """Thinking Qwen3.8 AgentDojo target for PI-Smith.
 
 This is the target pipeline of the recorded thinking-on AgentDojo evaluations
-of Qwen3.8-27B and its SecOPD model: native Qwen tool calls, tool results in
-the `input` role, the user prompt repeated after each tool result, and the
-Qwen thinking sampling profile over a 131,072-token context.
+of Qwen3.8-27B and its SecOPD model: native Qwen tool calls, the user prompt
+repeated after each tool result, and the Qwen thinking sampling profile over a
+131,072-token context. Defended models read tool results in the `input` role,
+as recorded; the undefended model reads them in its native `tool` role.
+Thinking that is still open after 32,768 tokens is closed and the turn is
+completed from there.
 """
 
 from __future__ import annotations
@@ -16,10 +19,12 @@ import json
 import re
 from typing import Any
 
-from secpo.evaluation.agentdyn_qwen36 import messages_to_qwen_input_roles
+from secpo.evaluation.agentdyn_qwen36 import _assistant_tool_calls, _content_text, messages_to_qwen_input_roles
 
 
 MAX_MODEL_LEN = 131072
+THINKING_MAX_TOKENS = 32768
+FINAL_MAX_TOKENS = 1536
 SAMPLING = dict(temperature=1.0, top_p=0.95, top_k=20, min_p=0.0,
                 presence_penalty=0.0, repetition_penalty=1.0, frequency_penalty=0.0)
 STOPS = ["<|im_end|>", "<|endoftext|>"]
@@ -41,8 +46,36 @@ def trust_role_template(tokenizer) -> str:
     return template
 
 
-def render_agent_prompt(tokenizer, messages, tools) -> str:
-    converted = messages_to_qwen_input_roles(messages)
+def native_messages(messages) -> list[dict[str, Any]]:
+    """AgentDojo messages in their own roles, for the unmodified Qwen3.8 template."""
+    converted = []
+    for message in messages:
+        role = message["role"]
+        content = _content_text(message.get("content"))
+        if role == "tool":
+            if message.get("error") is not None:
+                content = json.dumps({"error": str(message["error"])})
+            converted.append({"role": "tool", "content": content or "Success"})
+        elif role == "assistant":
+            result = {"role": "assistant", "content": content or None}
+            calls = _assistant_tool_calls(message)
+            if calls:
+                result["tool_calls"] = calls
+            converted.append(result)
+        elif role in ("system", "user"):
+            converted.append({"role": role, "content": content})
+        else:
+            raise ValueError(f"unsupported AgentDojo message role: {role!r}")
+    return converted
+
+
+def render_agent_prompt(tokenizer, messages, tools, tool_role: str) -> str:
+    if tool_role == "input":
+        converted, template = messages_to_qwen_input_roles(messages), trust_role_template(tokenizer)
+    elif tool_role == "tool":
+        converted, template = native_messages(messages), tokenizer.chat_template
+    else:
+        raise ValueError(f"tool role must be input or tool, got {tool_role!r}")
     # The converter serializes arguments for OpenAI-compatible servers;
     # the native Qwen3.8 XML template expects mappings when rendering history.
     for message in converted:
@@ -51,7 +84,7 @@ def render_agent_prompt(tokenizer, messages, tools) -> str:
             if isinstance(function.get("arguments"), str):
                 function["arguments"] = json.loads(function["arguments"])
     return tokenizer.apply_chat_template(
-        converted, tools=tools, chat_template=trust_role_template(tokenizer), tokenize=False,
+        converted, tools=tools, chat_template=template, tokenize=False,
         add_generation_prompt=True, enable_thinking=True, preserve_thinking=False,
     )
 
@@ -112,12 +145,12 @@ def tool_json_dumps(value):
     return json.dumps(value, default=default)
 
 
-def generate(tokenizer, url: str, served_model: str, prompt: str) -> str:
-    """One completion for a rendered prompt, sent as token IDs."""
+def complete(tokenizer, url: str, served_model: str, prompt: str, max_tokens: int) -> tuple[str, str]:
+    """One completion for a rendered prompt, sent as token IDs. Returns the text and the finish reason."""
     import requests
 
     tokens = tokenizer.encode(prompt, add_special_tokens=False)
-    max_tokens = MAX_MODEL_LEN - len(tokens)
+    max_tokens = min(max_tokens, MAX_MODEL_LEN - len(tokens))
     if max_tokens <= 0:
         raise AgentOutputError("Agent prompt exceeds model context")
     payload = dict(model=served_model, prompt=tokens, n=1, return_token_ids=True,
@@ -140,10 +173,21 @@ def generate(tokenizer, url: str, served_model: str, prompt: str) -> str:
         raise ValueError("Unexpected inference token accounting or finish reason")
     text = tokenizer.decode(output_ids, skip_special_tokens=False)
     positions = [text.find(stop) for stop in STOPS if stop in text]
-    return text[:min(positions)] if positions else text
+    return (text[:min(positions)] if positions else text), choice["finish_reason"]
 
 
-def make_pipeline(url: str, served_model: str, tokenizer_path: str):
+def generate(tokenizer, url: str, served_model: str, prompt: str) -> str:
+    """One agent turn; thinking still open after THINKING_MAX_TOKENS is closed and the turn completed."""
+    output, finish_reason = complete(tokenizer, url, served_model, prompt, THINKING_MAX_TOKENS)
+    closed = "</think>" in output
+    if closed and (finish_reason == "stop" or output.split("</think>", 1)[1].strip()):
+        return output
+    closing = "" if closed else "\n</think>\n\n"
+    final, _ = complete(tokenizer, url, served_model, prompt + output + closing, FINAL_MAX_TOKENS)
+    return output + closing + final
+
+
+def make_pipeline(url: str, served_model: str, tokenizer_path: str, tool_role: str):
     """AgentDojo pipeline whose LLM is the thinking Qwen3.8 model served at `url`."""
     from agentdojo.agent_pipeline.agent_pipeline import AgentPipeline, PipelineConfig
     from agentdojo.agent_pipeline.base_pipeline_element import BasePipelineElement
@@ -161,7 +205,7 @@ def make_pipeline(url: str, served_model: str, tokenizer_path: str):
             tools = [{"type": "function", "function": {
                 "name": f.name, "description": f.description, "parameters": f.parameters.model_json_schema()
             }} for f in runtime.functions.values()]
-            prompt = render_agent_prompt(tokenizer, messages, tools)
+            prompt = render_agent_prompt(tokenizer, messages, tools, tool_role)
             content, calls = parse_tool_response(generate(tokenizer, url, served_model, prompt), tools)
             message = {"role": "assistant",
                        "content": [text_content_block_from_string(content)] if content else None,

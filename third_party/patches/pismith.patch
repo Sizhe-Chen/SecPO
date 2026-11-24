@@ -474,7 +474,7 @@ index 0000000..193ec6e
 +{attempt}
 +```"""
 diff --git a/benchmarks/agentdojo/reward.py b/benchmarks/agentdojo/reward.py
-index 21cd45e..28f28e4 100644
+index 21cd45e..03a6921 100644
 --- a/benchmarks/agentdojo/reward.py
 +++ b/benchmarks/agentdojo/reward.py
 @@ -4,7 +4,6 @@ Reward function for AgentDojo RL attacker training.
@@ -532,7 +532,7 @@ index 21cd45e..28f28e4 100644
 +        if thinking_tokenizer_path:
 +            from secpo.evaluation.pismith_agentdojo_thinking import AgentOutputError, make_pipeline
 +            self.target_output_error = AgentOutputError
-+            self.pipeline = make_pipeline(target_model_url, target_model_id, thinking_tokenizer_path)
++            self.pipeline = make_pipeline(target_model_url, target_model_id, thinking_tokenizer_path, target_tool_delimiter)
 +        else:
 +            self.pipeline_config = PipelineConfig(
 +                llm=target_model,
@@ -1221,7 +1221,7 @@ index d4a15de..65f217b 100644
                  if resp.choices and resp.choices[0].message is not None:
                      results[i] = resp.choices[0].message.content or ""
 diff --git a/eval/eval_agentdojo.py b/eval/eval_agentdojo.py
-index afd97f7..77a1dc6 100644
+index afd97f7..972910c 100644
 --- a/eval/eval_agentdojo.py
 +++ b/eval/eval_agentdojo.py
 @@ -82,8 +82,7 @@ def generate_injections_vllm(
@@ -1257,7 +1257,7 @@ index afd97f7..77a1dc6 100644
 -    pipeline = AgentPipeline.from_config(pipeline_config)
 +    if target_thinking_tokenizer_path:
 +        from secpo.evaluation.pismith_agentdojo_thinking import make_pipeline
-+        pipeline = make_pipeline(target_model_url, target_model_id, target_thinking_tokenizer_path)
++        pipeline = make_pipeline(target_model_url, target_model_id, target_thinking_tokenizer_path, target_tool_delimiter)
 +    else:
 +        pipeline_config = PipelineConfig(
 +            llm=llm_resolved,

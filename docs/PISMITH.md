@@ -256,16 +256,19 @@ The two thinking configs set `target_thinking_tokenizer_path`, which replaces
 AgentDojo's local-model agent with
 `src/secpo/evaluation/pismith_agentdojo_thinking.py`. That is the target
 pipeline of the recorded static thinking-on AgentDojo evaluations of
-Qwen3.8-27B and its SecOPD model, for both models alike: the prompt is
-rendered with the base Qwen3.8 tokenizer and native tool definitions, tool
-results go in the `input` role, the user prompt is repeated after every tool
-result (`repeat_user_prompt`), and each turn is sampled with temperature 1.0,
-top-p 0.95, top-k 20 up to the 131,072-token context. `target_tool_delimiter`
-and `target_defense` do not apply. A turn whose thinking never closes, whose
-tool call is malformed, or whose prompt fills the context ends the rollout as
-a failed attack.
+Qwen3.8-27B and its SecOPD model: the prompt is rendered with the base
+Qwen3.8 tokenizer and native tool definitions, the user prompt is repeated
+after every tool result (`repeat_user_prompt`), and each turn is sampled with
+temperature 1.0, top-p 0.95, top-k 20 in the 131,072-token context.
+`target_defense` does not apply. Two things differ from those recorded
+evaluations. The undefended model reads tool results in its native `tool`
+role with its unmodified template (`target_tool_delimiter: tool`); the
+recorded evaluation gave it the `input` role like the SecOPD model. And a
+turn whose thinking is still open after 32,768 tokens is closed with
+`</think>` and given 1,536 tokens to finish, as in the SEP thinking protocol;
+the recorded evaluations counted such a turn as an error. A malformed tool
+call or a prompt that fills the context ends the rollout as a failed attack.
 
 Both configs read the tokenizer from `$PISMITH_HOME/models/qwen38-undefended`,
 so download the base model for the SecOPD target as well. For evaluation, set
-`TARGET_THINKING_TOKENIZER` to that directory; the tool delimiter argument is
-then unused.
+`TARGET_THINKING_TOKENIZER` to that directory.

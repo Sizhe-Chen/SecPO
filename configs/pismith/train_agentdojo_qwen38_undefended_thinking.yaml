@@ -13,7 +13,8 @@ attacker_model_name_or_path: ../models/qwen3-4b-instruct-2507
 
 target_model: local
 target_model_id: qwen38-undefended-thinking-agentdojo
-# Thinking Qwen3.8 target pipeline: native tool calls, tool results in the input role, repeated user prompt.
+# Thinking Qwen3.8 target pipeline: native tool calls, repeated user prompt, tool results in this role.
+target_tool_delimiter: tool
 target_thinking_tokenizer_path: ../models/qwen38-undefended
 
 reward_functions:
