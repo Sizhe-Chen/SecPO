@@ -217,9 +217,9 @@ sampled per pair; the recorded evaluations used 10.
 overall, per suite, and per injection task. A rollout that raises an error
 counts as a failed attack and is printed as `EVAL_ERROR`.
 
-With dense judge rewards, the adaptive-entropy schedule of the Qwen3.8 run
-used the mean reward as its success rate. The Qwen3.6 runs used the exact
-AgentDojo success rate instead, which their configs select with
+With dense judge rewards, the adaptive-entropy schedule of the recorded
+Qwen3.8 SecPO run used the mean reward as its success rate. Every other
+config uses the exact AgentDojo success rate instead, selected with
 `adaptive_exact_success: true`.
 
 ### ASR over training and evaluation

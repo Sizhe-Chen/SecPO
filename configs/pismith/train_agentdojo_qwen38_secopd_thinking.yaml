@@ -48,3 +48,6 @@ gradient_checkpointing: true
 adaptive: true
 
 report_to: none
+
+# Drive the adaptive schedule by the exact AgentDojo success rate, not the mean judge reward.
+adaptive_exact_success: true
