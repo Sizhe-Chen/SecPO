@@ -48,3 +48,6 @@ gradient_checkpointing: true
 adaptive: true
 
 report_to: none
+
+# The recorded Qwen3.6 runs drove the adaptive schedule by the exact AgentDojo success rate.
+adaptive_exact_success: true
