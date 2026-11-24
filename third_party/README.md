@@ -82,7 +82,7 @@ untrusted-`input`, and runtime-endpoint contracts.
 - `patches/pismith.patch` SHA-256:
   `d6719e4fc3d5b93c7cf30a68e46fa6ebf924dd61fb51cde0a2097f840e4a3eeb`
 - `patches/pismith_agentdojo.patch` SHA-256:
-  `2725b72c0ea8719457ef54fc4fb929e0e5fb4cd07deafb58ac94ef2bf83d2b4d`
+  `0296b79b24e903b53344dff4d1fcf86115cbc968d064ff1c27c08289a670863f`
 - Qwen3.8 input-role template `../templates/qwen38_input_role.jinja` SHA-256:
   `3439e5dc3169221799ef9fa7cc3290aa7b19436c3fe7bf589ae4a736131b0c45`
 
@@ -97,7 +97,10 @@ PI-Smith: it reads the local model's address from `AGENTDOJO_VLLM_URL`, which
 PI-Smith sets from the target URL, instead of a fixed port; it lets the
 local-model pipeline return tool results in the `tool` or `input` role, adds Qwen thinking controls and tool-call parsing, and adds
 the v1.2.2 task suites from AgentDojo `v0.1.35`
-(`a75aba7631d3ca5fb7ab938965c97ead2f9ff84b`).
+(`a75aba7631d3ca5fb7ab938965c97ead2f9ff84b`). It also makes
+the workspace injection tasks 10 to 12 return a failed attack, instead of
+raising `TypeError`, when the checked email carries a calendar event as an
+attachment.
 
 `../scripts/setup_pismith.sh` clones both repositories at these commits,
 applies the patches, and installs the environments pinned in
