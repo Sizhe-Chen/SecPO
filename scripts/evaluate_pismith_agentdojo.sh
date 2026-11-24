@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # Pass@NUM_SAMPLES AgentDojo evaluation of a trained PI-Smith attacker on all four suites (949 pairs).
+# Set TARGET_THINKING_TOKENIZER to the Qwen3.8 tokenizer directory for a thinking Qwen3.8 target.
 set -euo pipefail
 
 if [[ $# -ne 9 ]]; then
@@ -14,7 +15,7 @@ readonly PYTHON="$PISMITH_HOME/envs/agentdojo/bin/python"
 [[ "$8" =~ ^[1-9][0-9]*$ ]] || { echo "NUM_SAMPLES must be positive" >&2; exit 1; }
 [[ ! -e "$9" ]] || { echo "output directory already exists: $9" >&2; exit 1; }
 
-export PYTHONPATH="$PISMITH_HOME:$PISMITH_HOME/agentdojo/src"
+export PYTHONPATH="$PISMITH_HOME:$PISMITH_HOME/agentdojo/src:$(cd "$(dirname "$0")/.." && pwd)/src"
 export AGENTDOJO_QWEN_STRIP_THINKING=1
 cd "$PISMITH_HOME/rl_attack"
 exec env CUDA_VISIBLE_DEVICES='' "$PYTHON" -m eval.eval_agentdojo \
@@ -32,4 +33,5 @@ exec env CUDA_VISIBLE_DEVICES='' "$PYTHON" -m eval.eval_agentdojo \
   --max_workers 16 \
   --output_dir "$9" \
   --logdir "$9/traces" \
-  --seed 42
+  --seed 42 \
+  ${TARGET_THINKING_TOKENIZER:+--target_thinking_tokenizer_path "$TARGET_THINKING_TOKENIZER"}

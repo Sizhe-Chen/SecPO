@@ -116,7 +116,7 @@ The recorded target arguments are:
 | Qwen3.8 SEP thinking target, training | `--max-model-len 65536 --max-num-seqs 16 --gpu-memory-utilization 0.85` + Qwen3.8 arguments with `"enable_thinking":true` |
 | Qwen3.8 SEP thinking target, evaluation | `--max-model-len 65536 --max-num-seqs 16 --gpu-memory-utilization 0.90` + Qwen3.8 arguments with `"enable_thinking":true` |
 | Qwen3.8 AgentDojo target | `--max-model-len 32768 --max-num-seqs 32 --gpu-memory-utilization 0.90` + Qwen3.8 arguments |
-| Qwen3.8 AgentDojo thinking target | `--max-model-len 65536 --max-num-seqs 32 --gpu-memory-utilization 0.90` + Qwen3.8 arguments with `"enable_thinking":true` |
+| Qwen3.8 AgentDojo thinking target | `--max-model-len 131072 --max-num-seqs 32 --gpu-memory-utilization 0.90 --max-num-batched-tokens 4096 --enforce-eager --no-enable-prefix-caching --generation-config vllm --seed 42 --language-model-only` |
 | Qwen3.6 AgentDojo target | `--max-model-len 32768 --max-num-seqs 32 --gpu-memory-utilization 0.90 --language-model-only --default-chat-template-kwargs '{"enable_thinking":false}' --chat-template-content-format FORMAT` |
 | Trained attacker | `--max-model-len 8192 --gpu-memory-utilization 0.80` |
 
@@ -126,9 +126,9 @@ Qwen3.6 targets use the chat template in their model directory; `FORMAT` is
 `auto` for the undefended model and `string` for MetaSecAlign and SecPO.
 The undefended Qwen3.8 target also uses the chat template in its model
 directory: replace `--chat-template templates/qwen38_input_role.jinja` with
-`--chat-template-content-format auto`. The server arguments alone decide
-whether an AgentDojo target thinks; the agent keeps only the text after
-`</think>`.
+`--chat-template-content-format auto`. For these targets the server
+arguments decide whether the model thinks. The thinking AgentDojo targets
+are different: see [Thinking targets](#thinking-targets).
 
 The served name must be `pismith-target` for SEP targets and the
 `target_model_id` of the training config for AgentDojo targets.
@@ -249,3 +249,23 @@ python scripts/summarize_pismith_agentdojo_asr.py \
 It prints the number of broken pairs and the fewest and most attempts any
 pair received; a resumed training run replays part of an epoch, so the
 attempts per pair are not exactly 160.
+
+### Thinking targets
+
+The two thinking configs set `target_thinking_tokenizer_path`, which replaces
+AgentDojo's local-model agent with
+`src/secpo/evaluation/pismith_agentdojo_thinking.py`. That is the target
+pipeline of the recorded static thinking-on AgentDojo evaluations of
+Qwen3.8-27B and its SecOPD model, for both models alike: the prompt is
+rendered with the base Qwen3.8 tokenizer and native tool definitions, tool
+results go in the `input` role, the user prompt is repeated after every tool
+result (`repeat_user_prompt`), and each turn is sampled with temperature 1.0,
+top-p 0.95, top-k 20 up to the 131,072-token context. `target_tool_delimiter`
+and `target_defense` do not apply. A turn whose thinking never closes, whose
+tool call is malformed, or whose prompt fills the context ends the rollout as
+a failed attack.
+
+Both configs read the tokenizer from `$PISMITH_HOME/models/qwen38-undefended`,
+so download the base model for the SecOPD target as well. For evaluation, set
+`TARGET_THINKING_TOKENIZER` to that directory; the tool delimiter argument is
+then unused.

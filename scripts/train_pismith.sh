@@ -34,7 +34,7 @@ case "$BENCHMARK" in
     : "${OPENROUTER_BASE_URL:?Set OPENROUTER_BASE_URL for the reward judge}"
     : "${OPENROUTER_API_KEY:?Set OPENROUTER_API_KEY for the reward judge}"
     readonly PYTHON="$PISMITH_HOME/envs/agentdojo/bin/python"
-    export PYTHONPATH="$PISMITH_HOME:$PISMITH_HOME/agentdojo/src"
+    export PYTHONPATH="$PISMITH_HOME:$PISMITH_HOME/agentdojo/src:$REPO_ROOT/src"
     export AGENTDOJO_QWEN_STRIP_THINKING=1
     ;;
   *) echo "BENCHMARK must be piarena or agentdojo" >&2; exit 2 ;;

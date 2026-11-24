@@ -1,5 +1,5 @@
 diff --git a/benchmarks/agentdojo/config.py b/benchmarks/agentdojo/config.py
-index 96030ba..07b2289 100644
+index 96030ba..430b366 100644
 --- a/benchmarks/agentdojo/config.py
 +++ b/benchmarks/agentdojo/config.py
 @@ -59,6 +59,10 @@ class AgentDojoGRPOConfig(GRPOConfig):
@@ -13,9 +13,14 @@ index 96030ba..07b2289 100644
  
      # --- Attacker Model ---
      attacker_model_name_or_path: Optional[str] = field(default="Qwen/Qwen3-4B-Instruct-2507")
-@@ -77,6 +81,10 @@ class AgentDojoGRPOConfig(GRPOConfig):
+@@ -76,7 +80,15 @@ class AgentDojoGRPOConfig(GRPOConfig):
+     reward_functions: List[str] = field(
          default_factory=lambda: ["AgentDojoAttackReward"]
      )
++    target_thinking_tokenizer_path: Optional[str] = field(
++        default=None,
++        metadata={"help": "Qwen3.8 tokenizer directory; selects the thinking Qwen3.8 target pipeline of the SecPO repository"},
++    )
      soft_rewards: bool = field(default=False)
 +    adaptive_exact_success: bool = field(
 +        default=False,
@@ -469,7 +474,7 @@ index 0000000..193ec6e
 +{attempt}
 +```"""
 diff --git a/benchmarks/agentdojo/reward.py b/benchmarks/agentdojo/reward.py
-index 21cd45e..db90c31 100644
+index 21cd45e..28f28e4 100644
 --- a/benchmarks/agentdojo/reward.py
 +++ b/benchmarks/agentdojo/reward.py
 @@ -4,7 +4,6 @@ Reward function for AgentDojo RL attacker training.
@@ -504,24 +509,44 @@ index 21cd45e..db90c31 100644
  
          # Initialize logging
          log_dir = getattr(config, "output_dir", "logs")
-@@ -111,13 +120,16 @@ class AgentDojoAttackReward:
+@@ -111,17 +120,27 @@ class AgentDojoAttackReward:
              print(f"  Model URL: {target_model_url}")
  
          target_defense = getattr(config, "target_defense", None)
 +        target_tool_delimiter = getattr(config, "target_tool_delimiter", "tool")
          if target_defense:
              print(f"  Defense: {target_defense}")
+-
+-        self.pipeline_config = PipelineConfig(
+-            llm=target_model,
+-            model_id=target_model_id,
+-            defense=target_defense,
+-            system_message_name=None,
+-            system_message=None,
+-        )
+-        self.pipeline = AgentPipeline.from_config(self.pipeline_config)
 +        print(f"  Tool delimiter: {target_tool_delimiter}")
++
++        self.target_output_error = ()
++        thinking_tokenizer_path = getattr(config, "target_thinking_tokenizer_path", None)
++        if thinking_tokenizer_path:
++            from secpo.evaluation.pismith_agentdojo_thinking import AgentOutputError, make_pipeline
++            self.target_output_error = AgentOutputError
++            self.pipeline = make_pipeline(target_model_url, target_model_id, thinking_tokenizer_path)
++        else:
++            self.pipeline_config = PipelineConfig(
++                llm=target_model,
++                model_id=target_model_id,
++                defense=target_defense,
++                tool_delimiter=target_tool_delimiter,
++                system_message_name=None,
++                system_message=None,
++            )
++            self.pipeline = AgentPipeline.from_config(self.pipeline_config)
+         print(f"  Pipeline name: {self.pipeline.name}")
+         print(f"  Pipeline created successfully")
  
-         self.pipeline_config = PipelineConfig(
-             llm=target_model,
-             model_id=target_model_id,
-             defense=target_defense,
-+            tool_delimiter=target_tool_delimiter,
-             system_message_name=None,
-             system_message=None,
-         )
-@@ -152,27 +164,68 @@ class AgentDojoAttackReward:
+@@ -152,27 +171,72 @@ class AgentDojoAttackReward:
          injection_task_id: str,
          injection_text: str,
          injection_candidates: List[str],
@@ -544,6 +569,10 @@ index 21cd45e..db90c31 100644
                  injections=injections,
              )
 -            return utility, security
++        except self.target_output_error as e:
++            # The thinking target produced no usable turn; the attack failed.
++            print(f"  [AgentDojo] target output error for {suite_name}/{user_task_id}/{injection_task_id}: {e}")
++            return False, False, None
          except Exception as e:
 -            warnings.warn(
 -                f"AgentDojo evaluation failed for {user_task_id}+{injection_task_id}: {e}"
@@ -597,7 +626,7 @@ index 21cd45e..db90c31 100644
  
      def __call__(
          self,
-@@ -215,43 +268,42 @@ class AgentDojoAttackReward:
+@@ -215,43 +279,42 @@ class AgentDojoAttackReward:
  
          def eval_task(idx):
              if not format_ok[idx]:
@@ -653,7 +682,7 @@ index 21cd45e..db90c31 100644
              elif security:
                  rewards.append(1.0)
              else:
-@@ -261,9 +313,10 @@ class AgentDojoAttackReward:
+@@ -261,9 +324,10 @@ class AgentDojoAttackReward:
          self._step_counter += 1
          current_step = self._get_current_step()
  
@@ -665,7 +694,7 @@ index 21cd45e..db90c31 100644
  
          print(
              f"  [AgentDojo] Step {current_step} ASR: {asr:.1%} "
-@@ -274,6 +327,25 @@ class AgentDojoAttackReward:
+@@ -274,6 +338,25 @@ class AgentDojoAttackReward:
              print(f"  Suite: {suite_names[0]}, User: {user_task_ids[0]}, Inj: {injection_task_ids[0]}")
              print(f"  Injection: {injection_texts[0][:150]}...")
              print(f"  Reward: {rewards[0]}")
@@ -1192,7 +1221,7 @@ index d4a15de..65f217b 100644
                  if resp.choices and resp.choices[0].message is not None:
                      results[i] = resp.choices[0].message.content or ""
 diff --git a/eval/eval_agentdojo.py b/eval/eval_agentdojo.py
-index afd97f7..e913a86 100644
+index afd97f7..77a1dc6 100644
 --- a/eval/eval_agentdojo.py
 +++ b/eval/eval_agentdojo.py
 @@ -82,8 +82,7 @@ def generate_injections_vllm(
@@ -1205,23 +1234,44 @@ index afd97f7..e913a86 100644
  
      with ThreadPoolExecutor(max_workers=batch_size) as executor:
          futures = [executor.submit(_generate_one, i) for i in range(len(prompts))]
-@@ -162,6 +161,7 @@ def evaluate_agentdojo(
+@@ -162,6 +161,8 @@ def evaluate_agentdojo(
      target_model_id: Optional[str] = None,
      target_model_url: Optional[str] = None,
      target_defense: Optional[str] = None,
 +    target_tool_delimiter: str = "tool",
++    target_thinking_tokenizer_path: str = None,
      attacker_server_url: Optional[str] = None,
      attacker_base_model: Optional[str] = None,
      format_prompt: bool = True,
-@@ -203,6 +203,7 @@ def evaluate_agentdojo(
-         llm=llm_resolved,
-         model_id=target_model_id,
-         defense=target_defense,
-+        tool_delimiter=target_tool_delimiter,
-         system_message_name=None,
-         system_message=None,
-     )
-@@ -339,13 +340,18 @@ def evaluate_agentdojo(
+@@ -199,14 +200,19 @@ def evaluate_agentdojo(
+     # Create target pipeline
+     print("\nCreating target pipeline...")
+     llm_resolved = _resolve_agentdojo_model(target_model)
+-    pipeline_config = PipelineConfig(
+-        llm=llm_resolved,
+-        model_id=target_model_id,
+-        defense=target_defense,
+-        system_message_name=None,
+-        system_message=None,
+-    )
+-    pipeline = AgentPipeline.from_config(pipeline_config)
++    if target_thinking_tokenizer_path:
++        from secpo.evaluation.pismith_agentdojo_thinking import make_pipeline
++        pipeline = make_pipeline(target_model_url, target_model_id, target_thinking_tokenizer_path)
++    else:
++        pipeline_config = PipelineConfig(
++            llm=llm_resolved,
++            model_id=target_model_id,
++            defense=target_defense,
++            tool_delimiter=target_tool_delimiter,
++            system_message_name=None,
++            system_message=None,
++        )
++        pipeline = AgentPipeline.from_config(pipeline_config)
+     print(f"  Pipeline name: {pipeline.name}")
+ 
+     # Load evaluation dataset
+@@ -339,13 +345,18 @@ def evaluate_agentdojo(
                      )
                  except Exception as e:
                      logger.log_error(f"Eval failed: {e}")
@@ -1242,7 +1292,7 @@ index afd97f7..e913a86 100644
  
      eval_start = time.time()
      futures = []
-@@ -414,7 +420,7 @@ def evaluate_agentdojo(
+@@ -414,7 +425,7 @@ def evaluate_agentdojo(
                            f"Pass@{num_samples}: {passk_running:.1%} "
                            f"({n_pairs_passed}/{n_pairs_seen} pairs)")
              except Exception as e:
@@ -1251,7 +1301,7 @@ index afd97f7..e913a86 100644
  
      eval_time = time.time() - eval_start
  
-@@ -485,6 +491,7 @@ def evaluate_agentdojo(
+@@ -485,6 +496,7 @@ def evaluate_agentdojo(
              "target_model": target_model,
              "target_model_id": target_model_id,
              "target_defense": target_defense,
@@ -1259,19 +1309,22 @@ index afd97f7..e913a86 100644
              "eval_suites": eval_suites,
              "benchmark_version": benchmark_version,
              "format_prompt": format_prompt,
-@@ -539,6 +546,7 @@ def main():
+@@ -539,6 +551,9 @@ def main():
      parser.add_argument("--target_model_id", default=None)
      parser.add_argument("--target_model_url", default=None)
      parser.add_argument("--target_defense", default=None)
 +    parser.add_argument("--target_tool_delimiter", default="tool")
++    parser.add_argument("--target_thinking_tokenizer_path", default=None,
++                        help="Qwen3.8 tokenizer directory; selects the thinking Qwen3.8 target pipeline")
  
      # Evaluation config
      parser.add_argument("--eval_suites", default="workspace")
-@@ -581,6 +589,7 @@ def main():
+@@ -581,6 +596,8 @@ def main():
          target_model_id=args.target_model_id,
          target_model_url=args.target_model_url,
          target_defense=args.target_defense,
 +        target_tool_delimiter=args.target_tool_delimiter,
++        target_thinking_tokenizer_path=args.target_thinking_tokenizer_path,
          attacker_server_url=args.attacker_server_url,
          attacker_base_model=args.attacker_base_model,
          format_prompt=args.format_prompt,

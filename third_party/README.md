@@ -80,7 +80,7 @@ untrusted-`input`, and runtime-endpoint contracts.
 - commit: `16865a73b1930ac98fc90d517f1ab20d532f912b`
 - license: MIT
 - `patches/pismith.patch` SHA-256:
-  `363d4d0c611534e3a5899c48eaf861112fa2b9aa0714be416d7ba5cff58d6720`
+  `ab834e7eded7cecdab65f0e152859b459b9187e3c5beecf5944be72a41c6a876`
 - `patches/pismith_agentdojo.patch` SHA-256:
   `2725b72c0ea8719457ef54fc4fb929e0e5fb4cd07deafb58ac94ef2bf83d2b4d`
 - Qwen3.8 input-role template `../templates/qwen38_input_role.jinja` SHA-256:
