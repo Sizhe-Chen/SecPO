@@ -333,7 +333,12 @@
         "configs/pismith/train_sep_piarena_qwen38_secopd.yaml",
         "configs/pismith/train_sep_piarena_qwen38_secopd_thinking.yaml",
         "configs/pismith/train_sep_same1024_qwen38_secopd_thinking.yaml",
-        "requirements/pismith_target.lock.txt"
+        "requirements/pismith_target.lock.txt",
+        "configs/pismith/train_agentdojo_qwen38_metasecalign.yaml",
+        "configs/pismith/train_agentdojo_qwen38_secopd_thinking.yaml",
+        "configs/pismith/train_agentdojo_qwen38_undefended.yaml",
+        "configs/pismith/train_agentdojo_qwen38_undefended_thinking.yaml",
+        "scripts/summarize_pismith_agentdojo_asr.py"
       ],
       "required_paths": [
         "README.md",
@@ -647,6 +652,11 @@
         "configs/pismith/train_agentdojo_qwen36_undefended.yaml",
         "configs/pismith/train_agentdojo_qwen38_secpo.yaml",
         "configs/pismith/train_sep_piarena_qwen38_secopd.yaml",
+        "configs/pismith/train_agentdojo_qwen38_metasecalign.yaml",
+        "configs/pismith/train_agentdojo_qwen38_secopd_thinking.yaml",
+        "configs/pismith/train_agentdojo_qwen38_undefended.yaml",
+        "configs/pismith/train_agentdojo_qwen38_undefended_thinking.yaml",
+        "scripts/summarize_pismith_agentdojo_asr.py",
         "configs/pismith/train_sep_piarena_qwen38_secopd_thinking.yaml",
         "configs/pismith/train_sep_piarena_qwen38_secpo.yaml",
         "configs/pismith/train_sep_same1024_qwen38_secopd_thinking.yaml",

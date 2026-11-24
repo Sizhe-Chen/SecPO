@@ -116,6 +116,7 @@ The recorded target arguments are:
 | Qwen3.8 SEP thinking target, training | `--max-model-len 65536 --max-num-seqs 16 --gpu-memory-utilization 0.85` + Qwen3.8 arguments with `"enable_thinking":true` |
 | Qwen3.8 SEP thinking target, evaluation | `--max-model-len 65536 --max-num-seqs 16 --gpu-memory-utilization 0.90` + Qwen3.8 arguments with `"enable_thinking":true` |
 | Qwen3.8 AgentDojo target | `--max-model-len 32768 --max-num-seqs 32 --gpu-memory-utilization 0.90` + Qwen3.8 arguments |
+| Qwen3.8 AgentDojo thinking target | `--max-model-len 65536 --max-num-seqs 32 --gpu-memory-utilization 0.90` + Qwen3.8 arguments with `"enable_thinking":true` |
 | Qwen3.6 AgentDojo target | `--max-model-len 32768 --max-num-seqs 32 --gpu-memory-utilization 0.90 --language-model-only --default-chat-template-kwargs '{"enable_thinking":false}' --chat-template-content-format FORMAT` |
 | Trained attacker | `--max-model-len 8192 --gpu-memory-utilization 0.80` |
 
@@ -123,6 +124,11 @@ The Qwen3.8 arguments are
 `--language-model-only --default-chat-template-kwargs '{"enable_thinking":false}' --chat-template templates/qwen38_input_role.jinja`.
 Qwen3.6 targets use the chat template in their model directory; `FORMAT` is
 `auto` for the undefended model and `string` for MetaSecAlign and SecPO.
+The undefended Qwen3.8 target also uses the chat template in its model
+directory: replace `--chat-template templates/qwen38_input_role.jinja` with
+`--chat-template-content-format auto`. The server arguments alone decide
+whether an AgentDojo target thinks; the agent keeps only the text after
+`</think>`.
 
 The served name must be `pismith-target` for SEP targets and the
 `target_model_id` of the training config for AgentDojo targets.
@@ -194,7 +200,7 @@ AgentDojo's exact checker:
 ```bash
 bash scripts/evaluate_pismith_agentdojo.sh \
   "$PISMITH_HOME/runs/agentdojo_qwen36_undefended/checkpoints/checkpoint-560" \
-  "$ATTACKER_URL" "$TARGET_URL" qwen36-undefended-agentdojo tool v1.2.2 0.7 \
+  "$ATTACKER_URL" "$TARGET_URL" qwen36-undefended-agentdojo tool v1.2.2 0.7 10 \
   "$PISMITH_HOME/runs/agentdojo_qwen36_undefended/results"
 ```
 
@@ -205,7 +211,9 @@ bash scripts/evaluate_pismith_agentdojo.sh \
 | `train_agentdojo_qwen36_metasecalign.yaml` | `qwen36-metasecalign-agentdojo` | `input` | `v1.2.2` | 0.7 | 560 |
 | `train_agentdojo_qwen36_secpo.yaml` | `qwen36-secpo-agentdojo` | `input` | `v1.2.2` | 0.7 | 560 |
 
-`eval_results.json` in the output directory reports pass@10 and utility
+The argument after the attacker temperature is the number of injections
+sampled per pair; the recorded evaluations used 10.
+`eval_results.json` in the output directory reports pass@k and utility
 overall, per suite, and per injection task. A rollout that raises an error
 counts as a failed attack and is printed as `EVAL_ERROR`.
 
@@ -213,3 +221,31 @@ The Qwen3.8 run predates one training fix that the patch contains: with dense
 judge rewards the adaptive-entropy schedule now uses the exact AgentDojo
 success rate instead of the mean reward. The Qwen3.6 runs used the patch as
 released.
+
+### ASR over training and evaluation
+
+Four more Qwen3.8 configs train on all 949 v1.2.1 pairs like
+`train_agentdojo_qwen38_secpo.yaml`; none has a recorded result yet.
+
+| Training config | Target | `TARGET_MODEL_ID` | Tool delimiter |
+| --- | --- | --- | --- |
+| `train_agentdojo_qwen38_undefended.yaml` | Qwen3.8-27B | `qwen38-undefended-agentdojo` | `tool` |
+| `train_agentdojo_qwen38_metasecalign.yaml` | Qwen3.8-27B MetaSecAlign | `qwen38-metasecalign-agentdojo` | `input` |
+| `train_agentdojo_qwen38_undefended_thinking.yaml` | Qwen3.8-27B, thinking | `qwen38-undefended-thinking-agentdojo` | `tool` |
+| `train_agentdojo_qwen38_secopd_thinking.yaml` | Qwen3.8-27B SecOPD, thinking | `qwen38-secopd-thinking-agentdojo` | `input` |
+
+Ten epochs with 16 generations give each pair 160 training attempts, each
+logged with its exact AgentDojo result in
+`checkpoints/logs/agentdojo_judge_samples.jsonl`. ASR@200 counts a pair as
+broken when any of those attempts or any of 40 evaluation samples of the final
+checkpoint succeeded:
+
+```bash
+python scripts/summarize_pismith_agentdojo_asr.py \
+  --training-log "$PISMITH_HOME/runs/agentdojo_qwen38_undefended/checkpoints/logs/agentdojo_judge_samples.jsonl" \
+  --evaluation "$PISMITH_HOME/runs/agentdojo_qwen38_undefended/results/eval_detailed.jsonl"
+```
+
+It prints the number of broken pairs and the fewest and most attempts any
+pair received; a resumed training run replays part of an epoch, so the
+attempts per pair are not exactly 160.
