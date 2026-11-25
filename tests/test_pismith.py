@@ -76,7 +76,7 @@ class PISmithProtocolTests(unittest.TestCase):
 
     def test_patches_and_lock_files_are_the_recorded_ones(self):
         expected = {
-            "third_party/patches/pismith.patch": "d6719e4fc3d5b93c7cf30a68e46fa6ebf924dd61fb51cde0a2097f840e4a3eeb",
+            "third_party/patches/pismith.patch": "efe029cfbad71792268ff37cac9d1fd3c59073ac281dd63a728f385f4c957ba1",
             "third_party/patches/pismith_agentdojo.patch": "0296b79b24e903b53344dff4d1fcf86115cbc968d064ff1c27c08289a670863f",
             "templates/qwen38_input_role.jinja": "3439e5dc3169221799ef9fa7cc3290aa7b19436c3fe7bf589ae4a736131b0c45",
             "requirements/pismith_train.lock.txt": "900ac60fd8594b666d70102df7b3d54911b098ccf7c7fb04ac0f068334275a6c",

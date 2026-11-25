@@ -474,10 +474,10 @@ index 0000000..193ec6e
 +{attempt}
 +```"""
 diff --git a/benchmarks/agentdojo/reward.py b/benchmarks/agentdojo/reward.py
-index 21cd45e..03a6921 100644
+index 21cd45e..76c7199 100644
 --- a/benchmarks/agentdojo/reward.py
 +++ b/benchmarks/agentdojo/reward.py
-@@ -4,7 +4,6 @@ Reward function for AgentDojo RL attacker training.
+@@ -4,16 +4,18 @@ Reward function for AgentDojo RL attacker training.
  
  import os
  import json
@@ -485,7 +485,11 @@ index 21cd45e..03a6921 100644
  from datetime import datetime
  from typing import List, Dict, Any, Optional, Tuple
  from concurrent.futures import ThreadPoolExecutor, as_completed
-@@ -14,6 +13,7 @@ from agentdojo.task_suite.task_suite import TaskSuite
+ 
++import openai
++
+ from agentdojo.task_suite.load_suites import get_suite
+ from agentdojo.task_suite.task_suite import TaskSuite
  from agentdojo.agent_pipeline.agent_pipeline import AgentPipeline, PipelineConfig
  
  from rl_attack.benchmarks.agentdojo.dataset import compute_injection_candidates
@@ -493,7 +497,7 @@ index 21cd45e..03a6921 100644
  
  
  AGENTDOJO_MODEL_ALIASES = {
-@@ -84,6 +84,15 @@ class AgentDojoAttackReward:
+@@ -84,6 +86,15 @@ class AgentDojoAttackReward:
          self.format_prompt = getattr(config, "format_prompt", True)
          self.max_workers = getattr(config, "eval_max_workers", 8)
          self.benchmark_version = getattr(config, "benchmark_version", "v1.2.2")
@@ -509,7 +513,7 @@ index 21cd45e..03a6921 100644
  
          # Initialize logging
          log_dir = getattr(config, "output_dir", "logs")
-@@ -111,17 +120,27 @@ class AgentDojoAttackReward:
+@@ -111,17 +122,27 @@ class AgentDojoAttackReward:
              print(f"  Model URL: {target_model_url}")
  
          target_defense = getattr(config, "target_defense", None)
@@ -546,7 +550,7 @@ index 21cd45e..03a6921 100644
          print(f"  Pipeline name: {self.pipeline.name}")
          print(f"  Pipeline created successfully")
  
-@@ -152,27 +171,72 @@ class AgentDojoAttackReward:
+@@ -152,27 +173,76 @@ class AgentDojoAttackReward:
          injection_task_id: str,
          injection_text: str,
          injection_candidates: List[str],
@@ -578,6 +582,10 @@ index 21cd45e..03a6921 100644
 -                f"AgentDojo evaluation failed for {user_task_id}+{injection_task_id}: {e}"
 -            )
 -            return False, False
++            if isinstance(e, openai.BadRequestError) and "maximum context length" in str(e):
++                # The conversation outgrew the target's context; the attack failed, as in evaluation.
++                print(f"  [AgentDojo] target context full for {suite_name}/{user_task_id}/{injection_task_id}")
++                return False, False, None
 +            raise RuntimeError(
 +                f"AgentDojo evaluation failed for {suite_name}/"
 +                f"{user_task_id}/{injection_task_id}"
@@ -626,7 +634,7 @@ index 21cd45e..03a6921 100644
  
      def __call__(
          self,
-@@ -215,43 +279,42 @@ class AgentDojoAttackReward:
+@@ -215,43 +285,42 @@ class AgentDojoAttackReward:
  
          def eval_task(idx):
              if not format_ok[idx]:
@@ -682,7 +690,7 @@ index 21cd45e..03a6921 100644
              elif security:
                  rewards.append(1.0)
              else:
-@@ -261,9 +324,10 @@ class AgentDojoAttackReward:
+@@ -261,9 +330,10 @@ class AgentDojoAttackReward:
          self._step_counter += 1
          current_step = self._get_current_step()
  
@@ -694,7 +702,7 @@ index 21cd45e..03a6921 100644
  
          print(
              f"  [AgentDojo] Step {current_step} ASR: {asr:.1%} "
-@@ -274,6 +338,25 @@ class AgentDojoAttackReward:
+@@ -274,6 +344,25 @@ class AgentDojoAttackReward:
              print(f"  Suite: {suite_names[0]}, User: {user_task_ids[0]}, Inj: {injection_task_ids[0]}")
              print(f"  Injection: {injection_texts[0][:150]}...")
              print(f"  Reward: {rewards[0]}")

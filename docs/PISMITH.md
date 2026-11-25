@@ -215,7 +215,9 @@ The argument after the attacker temperature is the number of injections
 sampled per pair; the recorded evaluations used 10.
 `eval_results.json` in the output directory reports pass@k and utility
 overall, per suite, and per injection task. A rollout that raises an error
-counts as a failed attack and is printed as `EVAL_ERROR`.
+counts as a failed attack and is printed as `EVAL_ERROR`. Training treats a
+conversation that outgrows the target's context the same way; any other
+rollout error stops training.
 
 With dense judge rewards, the adaptive-entropy schedule of the recorded
 Qwen3.8 SecPO run used the mean reward as its success rate. Every other
