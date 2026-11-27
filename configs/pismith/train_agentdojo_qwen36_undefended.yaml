@@ -1,0 +1,53 @@
+# The training script adds target_model_url; paths are relative to PISMITH_HOME/rl_attack.
+train_suites: workspace
+eval_suites: null
+train_injection_tasks: injection_task_0,injection_task_1,injection_task_2,injection_task_3,injection_task_4,injection_task_5,injection_task_6
+eval_injection_tasks: null
+train_user_tasks: null
+eval_user_tasks: null
+benchmark_version: v1.2.2
+
+format_prompt: true
+
+attacker_model_name_or_path: ../models/qwen3-4b-instruct-2507
+
+target_model: local
+target_model_id: qwen36-undefended-agentdojo
+target_defense: null
+target_tool_delimiter: tool
+
+reward_functions:
+  - AgentDojoAttackReward
+soft_rewards: true
+eval_max_workers: 8
+
+# Official PISmith configs/agentdojo.yaml hyperparameters and train subset (workspace, injection_task_0-6, v1.2.2); only max_completion_length changed (512 -> 1024).
+max_completion_length: 1024
+num_generations: 16
+temperature: 1.0
+
+output_dir: ../runs/agentdojo_qwen36_undefended/checkpoints
+per_device_train_batch_size: 10
+gradient_accumulation_steps: 2
+learning_rate: 1.0e-5
+num_train_epochs: 10
+seed: 42
+save_strategy: steps
+save_steps: 50
+save_total_limit: 2
+logging_steps: 1
+bf16: true
+max_grad_norm: 1.0
+loss_type: grpo
+epsilon: 0.5
+beta: 0.0
+warmup_ratio: 0.02
+lr_scheduler_type: constant_with_warmup
+gradient_checkpointing: true
+
+adaptive: true
+
+report_to: none
+
+# The recorded Qwen3.6 runs drove the adaptive schedule by the exact AgentDojo success rate.
+adaptive_exact_success: true

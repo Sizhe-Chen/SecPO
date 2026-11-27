@@ -1,0 +1,4 @@
+default:
+  provider: gemini
+  model: gemini-3.1-flash-lite
+  api_key_env: GEMINI_API_KEY

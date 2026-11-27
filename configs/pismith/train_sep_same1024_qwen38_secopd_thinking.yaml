@@ -1,0 +1,46 @@
+# The training script adds target_model_url judge_model_config, and target_chat_template_path; paths are relative to PISMITH_HOME/rl_attack.
+dataset_path: ../data/SEP_dataset_test.json
+dataset_split: sep_all
+train_start_idx: 0
+train_end_idx: 1024
+attack_template: recent_update
+format_prompt: true
+
+attacker_model_name_or_path: ../models/qwen3-4b-instruct-2507
+target_model_name_or_path: ../models/qwen38-secopd
+target_served_model_name: pismith-target
+defense_method: none
+target_data_role: input
+
+inject_position: mid
+target_model_max_tokens: 32768
+target_model_temperature: 0.0
+target_parallel_queries: 16
+target_enable_thinking: true
+score_response_after_think: true
+target_force_close: true
+target_request_timeout: 600.0
+target_final_answer_max_tokens: 1024
+
+max_completion_length: 1024
+num_generations: 15
+temperature: 1.0
+output_dir: ../runs/sep_same1024_qwen38_secopd_thinking/checkpoints
+per_device_train_batch_size: 4
+gradient_accumulation_steps: 5
+learning_rate: 1.0e-5
+num_train_epochs: 1
+seed: 42
+save_steps: 32
+save_total_limit: 8
+logging_steps: 1
+bf16: true
+max_grad_norm: 1.0
+loss_type: grpo
+epsilon: 0.2
+beta: 0.0
+warmup_ratio: 0.03
+lr_scheduler_type: constant_with_warmup
+gradient_checkpointing: true
+adaptive: true
+report_to: none
